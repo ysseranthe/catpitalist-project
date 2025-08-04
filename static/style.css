@@ -60,6 +60,7 @@ body {
 }
 
 /* Анимацию нажатия теперь применяем к контейнеру, когда активна наша область */
-#cat-container:active #cat {
-    transform: scale(0.9);
+@keyframes clickAnimation {
+    from { transform: scale(1); }
+    to { transform: scale(0.9); }
 }
