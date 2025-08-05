@@ -184,28 +184,44 @@ body {
     padding-bottom: calc(8px + env(safe-area-inset-bottom)); /* Безопасная зона на iPhone */
     border-top: 1px solid #3a3a3c;
 }
+
 .tab-button {
     background: none;
     border: none;
-    padding: 8px;
+    padding: 4px 8px; /* Немного уменьшаем вертикальный паддинг */
     border-radius: 12px;
     transition: background-color 0.2s ease;
+
+    /* --- ГЛАВНОЕ ИЗМЕНЕНИЕ: делаем кнопку flex-контейнером --- */
+    display: flex;
+    flex-direction: column; /* Элементы внутри (иконка, текст) будут идти сверху вниз */
+    align-items: center;    /* Выравниваем их по центру */
+    gap: 4px;               /* Добавляем небольшой отступ между иконкой и текстом */
 }
+
 .tab-button:active {
-    background-color: #444; /* Легкая подсветка при физическом нажатии */
+    background-color: #444;
 }
 
 /* Стили для ВСЕХ иконок в меню */
 .tab-button img {
-    width: 32px;
-    height: 32px;
-    /* По умолчанию делаем иконки полупрозрачными (серыми) */
-    opacity: 0.5;
+    width: 28px; /* Немного уменьшаем иконки, чтобы освободить место */
+    height: 28px;
+    opacity: 0.6; /* Неактивные иконки делаем полупрозрачными */
     transition: opacity 0.2s ease;
 }
 
-/* Стиль для иконки ВНУТРИ АКТИВНОЙ кнопки */
+.tab-button span {
+    font-family: 'Lexend', sans-serif; /* Убеждаемся, что используется наш шрифт */
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-secondary); /* Неактивные названия делаем серыми */
+    transition: color 0.2s ease;
+}
+
 .tab-button.active img {
-    /* Делаем активную иконку полностью непрозрачной (ярко-белой) */
-    opacity: 1;
+    opacity: 1; /* Активная иконка - полностью непрозрачная */
+}
+.tab-button.active span {
+    color: var(--text-primary); /* Активное название - белое */
 }
