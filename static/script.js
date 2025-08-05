@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-
     // --- ЭЛЕМЕНТЫ ИНТЕРФЕЙСА ---
     const scoreElement = document.getElementById('score');
     const catElement = document.getElementById('cat');
@@ -55,16 +54,15 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             usernameDisplayElement.innerText = "Error";
             clickArea.style.pointerEvents = 'none';
-            isLoading = false;
+            isLoading = false; // Важно, чтобы не было вечной блокировки
         }
     }
 
     function setupEventListeners(tg) {
         clickArea.addEventListener('pointerdown', () => {
-            // ВОЗВРАЩАЕМ ПРОВЕРКУ: кликать можно только если загрузка НЕ идет
-            // и если достаточно энергии
+            // Кликать можно только если загрузка НЕ идет и если достаточно энергии
             if (isLoading || Math.floor(energy) < tapValue) {
-                return; // Ничего не делаем
+                return;
             }
 
             // Если все проверки пройдены, выполняем действия
@@ -125,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
             isLoading = false;
             return;
         }
-        isLoading = true;
+        isLoading = true; // Включаем блокировку перед запросом
         try {
             const response = await fetch(`/api/get_score/${userId}`);
             const data = await response.json();
@@ -140,13 +138,14 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error("Error loading state:", error);
         } finally {
-            isLoading = false;
+            isLoading = false; // Отключаем блокировку после завершения запроса (успешного или нет)
         }
     }
 
     async function saveStateToServer() {
         if (!userId) return;
         try {
+            // "Отправил и забыл" - не ждем ответа, чтобы не замедлять интерфейс
             fetch('/api/save_score', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
