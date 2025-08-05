@@ -111,6 +111,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         levelProgressText.innerText = `${level}/15`;
 
         const catImage = catImageLevels[level] || catImageLevels[catImageLevels.length - 1];
+        console.log(`Updating cat image for level ${level}. Using file: ${catImage}`);
         if(catImage) catElement.style.backgroundImage = `url('/static/images/${catImage}')`;
     }
     
