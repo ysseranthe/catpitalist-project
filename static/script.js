@@ -61,8 +61,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function setupEventListeners(tg) {
         clickArea.addEventListener('pointerdown', () => {
-            if (isLoading || Math.floor(energy) < tapValue) return;
+            // ВОЗВРАЩАЕМ ПРОВЕРКУ: кликать можно только если загрузка НЕ идет
+            // и если достаточно энергии
+            if (isLoading || Math.floor(energy) < tapValue) {
+                return; // Ничего не делаем
+            }
 
+            // Если все проверки пройдены, выполняем действия
             energy -= tapValue;
             score += tapValue;
             
