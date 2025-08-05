@@ -38,6 +38,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     setInterval(visualTick, 1000);
 
+
     async function setupUserAndLoadData(tg) {
 
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
