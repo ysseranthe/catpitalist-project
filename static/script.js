@@ -1,4 +1,5 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => { // <<< Делаем обработчик асинхронным
+
     // --- ЭЛЕМЕНТЫ ИНТЕРФЕЙСА ---
     const scoreElement = document.getElementById('score');
     const catElement = document.getElementById('cat');
@@ -15,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let isLoading = true;
     let level = 1;
 
-    // --- ИГРОВЫЕ ПАРАМЕТРЫ (получим с сервера) ---
+    // --- ИГРОВЫЕ ПАРАМЕТРЫ ---
     let profitPerHour = 0;
     let energyPerSecond = 0;
     const maxEnergy = 100;
@@ -27,21 +28,22 @@ document.addEventListener('DOMContentLoaded', () => {
     tg.ready();
     tg.expand();
     
-    setupUser(tg);
+    // <<< ЖДЕМ завершения настройки пользователя
+    await setupUser(tg); 
     setupEventListeners(tg);
 
-    // Запускаем главный игровой цикл (тик), который обновляет интерфейс
     setInterval(visualTick, 1000);
 
     // --- ФУНКЦИИ ---
 
-    function setupUser(tg) {
-        // Закомментировано для продакшена. Раскомментируйте для локального теста.
+    // <<< Делаем функцию асинхронной, чтобы использовать await внутри
+    async function setupUser(tg) {
+        // Закомментировано для продакшена.
         /*
         if (true) { 
             userId = 12345678;
             usernameDisplayElement.innerText = "Local Test";
-            loadStateFromServer();
+            await loadStateFromServer(); // <<< ЖДЕМ загрузки
             return;
         }
         */
@@ -50,25 +52,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const user = tg.initDataUnsafe.user;
             userId = user.id;
             usernameDisplayElement.innerText = user.username || `${user.first_name} ${user.last_name || ''}`.trim();
-            loadStateFromServer();
+            await loadStateFromServer(); // <<< ЖДЕМ загрузки
         } else {
             usernameDisplayElement.innerText = "Error";
             clickArea.style.pointerEvents = 'none';
-            isLoading = false; // Важно, чтобы не было вечной блокировки
+            isLoading = false; 
         }
     }
 
     function setupEventListeners(tg) {
         clickArea.addEventListener('pointerdown', () => {
-            // Кликать можно только если загрузка НЕ идет и если достаточно энергии
             if (isLoading || Math.floor(energy) < tapValue) {
                 return;
             }
-
-            // Если все проверки пройдены, выполняем действия
             energy -= tapValue;
             score += tapValue;
-            
             animateCat();
             updateDisplay();
             saveStateToServer();
@@ -85,25 +83,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ГЛАВНЫЙ ИГРОВОЙ ТИК (вызывается каждую секунду)
     function visualTick() {
         if (isLoading) return;
-
-        // Имитируем пассивный доход
         score += profitPerHour / 3600;
-
-        // Имитируем регенерацию энергии
         if (energy < maxEnergy) {
             energy = Math.min(maxEnergy, energy + energyPerSecond);
         }
-
         updateDisplay();
     }
     
     function updateDisplay() {
         scoreElement.innerText = Math.floor(score).toLocaleString('en-US');
         energyLevelElement.innerText = `${Math.floor(energy)}/${maxEnergy}`;
-        
         const requiredScore = scoreToNextLevel[level] || Infinity;
         const prevLevelScore = scoreToNextLevel[level - 1] || 0;
         const progressForCurrentLevel = score - prevLevelScore;
@@ -116,19 +107,16 @@ document.addEventListener('DOMContentLoaded', () => {
         catElement.style.transform = 'scale(0.9)';
     }
 
-    // --- ВЗАИМОДЕЙСТВИЕ С СЕРВЕРОМ ---
-
     async function loadStateFromServer() {
         if (!userId) {
             isLoading = false;
             return;
         }
-        isLoading = true; // Включаем блокировку перед запросом
+        isLoading = true;
         try {
             const response = await fetch(`/api/get_score/${userId}`);
             const data = await response.json();
             if (response.ok) {
-                // Устанавливаем точные значения и скорости, полученные от сервера
                 score = data.score;
                 energy = data.energy;
                 profitPerHour = data.profit_per_hour;
@@ -138,14 +126,13 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error("Error loading state:", error);
         } finally {
-            isLoading = false; // Отключаем блокировку после завершения запроса (успешного или нет)
+            isLoading = false;
         }
     }
 
     async function saveStateToServer() {
         if (!userId) return;
         try {
-            // "Отправил и забыл" - не ждем ответа, чтобы не замедлять интерфейс
             fetch('/api/save_score', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
