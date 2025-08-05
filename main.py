@@ -67,7 +67,7 @@ async def get_score(user_id: int):
     # --- Игровые параметры ---
     max_energy = 100
     profit_per_hour_levels = [0, 0, 50, 200, 750, 2500, 10000, 40000, 150000, 600000, 2500000, 12000000, 60000000, 300000000, 2000000000, 15000000000]
-    energy_per_second_base = 100
+    energy_per_second_base = 10
     
     # --- ИСПРАВЛЕНИЕ: БЕРЕМ АКТУАЛЬНЫЙ УРОВЕНЬ ИЗ БАЗЫ ---
     current_level = user['level']
@@ -82,14 +82,6 @@ async def get_score(user_id: int):
     profit_gained = (profit_per_hour_base / 3600) * time_passed_seconds
     new_score = user['score'] + profit_gained
     
-    # --- Сохраняем офлайн-прогресс (это мы уже исправили, оставляем) ---
-    update_query = users.update().where(users.c.user_id == user_id).values(
-        score=int(new_score),
-        energy=new_energy,
-        last_seen=datetime.datetime.utcnow()
-    )
-    await database.execute(update_query)
-
     # Возвращаем клиенту АКТУАЛЬНЫЙ уровень из базы
     return {
         "user_id": user_id,
