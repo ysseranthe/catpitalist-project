@@ -1,5 +1,4 @@
-document.addEventListener('DOMContentLoaded', async () => { // <<< Делаем обработчик асинхронным
-
+document.addEventListener('DOMContentLoaded', async () => {
     // --- ЭЛЕМЕНТЫ ИНТЕРФЕЙСА ---
     const scoreElement = document.getElementById('score');
     const catElement = document.getElementById('cat');
@@ -13,10 +12,10 @@ document.addEventListener('DOMContentLoaded', async () => { // <<< Делаем 
     let score = 0;
     let energy = 0;
     let userId = null;
-    let isLoading = true;
+    let isLoading = true; // Начинаем в состоянии загрузки
     let level = 1;
 
-    // --- ИГРОВЫЕ ПАРАМЕТРЫ ---
+    // --- ИГРОВЫЕ ПАРАМЕТРЫ (будут загружены с сервера) ---
     let profitPerHour = 0;
     let energyPerSecond = 0;
     const maxEnergy = 100;
@@ -28,22 +27,23 @@ document.addEventListener('DOMContentLoaded', async () => { // <<< Делаем 
     tg.ready();
     tg.expand();
     
-    // <<< ЖДЕМ завершения настройки пользователя
-    await setupUser(tg); 
-    setupEventListeners(tg);
+    // СНАЧАЛА настраиваем слушатели, чтобы они были готовы
+    setupEventListeners();
+    // ПОТОМ асинхронно настраиваем пользователя и ждем загрузки данных
+    await setupUserAndLoadData(tg);
 
+    // Запускаем игровой цикл ТОЛЬКО ПОСЛЕ загрузки
     setInterval(visualTick, 1000);
 
     // --- ФУНКЦИИ ---
 
-    // <<< Делаем функцию асинхронной, чтобы использовать await внутри
-    async function setupUser(tg) {
-        // Закомментировано для продакшена.
+    async function setupUserAndLoadData(tg) {
+        // Закомментировано для продакшена. Раскомментируйте для локального теста.
         /*
         if (true) { 
             userId = 12345678;
             usernameDisplayElement.innerText = "Local Test";
-            await loadStateFromServer(); // <<< ЖДЕМ загрузки
+            await loadStateFromServer(); // ЖДЕМ загрузки данных
             return;
         }
         */
@@ -52,21 +52,24 @@ document.addEventListener('DOMContentLoaded', async () => { // <<< Делаем 
             const user = tg.initDataUnsafe.user;
             userId = user.id;
             usernameDisplayElement.innerText = user.username || `${user.first_name} ${user.last_name || ''}`.trim();
-            await loadStateFromServer(); // <<< ЖДЕМ загрузки
+            await loadStateFromServer(); // ЖДЕМ загрузки данных
         } else {
             usernameDisplayElement.innerText = "Error";
             clickArea.style.pointerEvents = 'none';
-            isLoading = false; 
+            isLoading = false; // Снимаем блокировку, если Telegram API недоступен
         }
     }
 
-    function setupEventListeners(tg) {
+    function setupEventListeners() {
         clickArea.addEventListener('pointerdown', () => {
+            // Проверяем, не идет ли загрузка и достаточно ли энергии
             if (isLoading || Math.floor(energy) < tapValue) {
                 return;
             }
+
             energy -= tapValue;
             score += tapValue;
+            
             animateCat();
             updateDisplay();
             saveStateToServer();
@@ -84,17 +87,21 @@ document.addEventListener('DOMContentLoaded', async () => { // <<< Делаем 
     }
 
     function visualTick() {
-        if (isLoading) return;
+        if (isLoading) return; // Не обновляем ничего, пока данные не загружены
+        
         score += profitPerHour / 3600;
+
         if (energy < maxEnergy) {
             energy = Math.min(maxEnergy, energy + energyPerSecond);
         }
+
         updateDisplay();
     }
     
     function updateDisplay() {
         scoreElement.innerText = Math.floor(score).toLocaleString('en-US');
         energyLevelElement.innerText = `${Math.floor(energy)}/${maxEnergy}`;
+        
         const requiredScore = scoreToNextLevel[level] || Infinity;
         const prevLevelScore = scoreToNextLevel[level - 1] || 0;
         const progressForCurrentLevel = score - prevLevelScore;
@@ -112,7 +119,7 @@ document.addEventListener('DOMContentLoaded', async () => { // <<< Делаем 
             isLoading = false;
             return;
         }
-        isLoading = true;
+        isLoading = true; // Включаем блокировку перед запросом
         try {
             const response = await fetch(`/api/get_score/${userId}`);
             const data = await response.json();
@@ -121,12 +128,12 @@ document.addEventListener('DOMContentLoaded', async () => { // <<< Делаем 
                 energy = data.energy;
                 profitPerHour = data.profit_per_hour;
                 energyPerSecond = data.energy_per_second;
-                updateDisplay();
+                updateDisplay(); // Первое отображение данных после загрузки
             }
         } catch (error) {
             console.error("Error loading state:", error);
         } finally {
-            isLoading = false;
+            isLoading = false; // Отключаем блокировку в любом случае
         }
     }
 
