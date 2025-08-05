@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    // --- ЭЛЕМЕНТЫ ИНТЕРФЕЙСА ---
+
     const scoreElement = document.getElementById('score');
     const catElement = document.getElementById('cat');
     const clickArea = document.getElementById('click-area');
@@ -7,69 +7,62 @@ document.addEventListener('DOMContentLoaded', async () => {
     const progressBarElement = document.getElementById('progress-bar-foreground');
     const usernameDisplayElement = document.getElementById('username-display');
     const tabButtons = document.querySelectorAll('.tab-button');
+    const tapEarnValue = document.getElementById('tap-earn-value');
+    const levelUpCost = document.getElementById('level-up-cost');
+    const profitValue = document.getElementById('profit-value');
+    const levelName = document.getElementById('level-name');
+    const levelProgressText = document.getElementById('level-progress-text');
 
-    // --- ИГРОВЫЕ ПЕРЕМЕННЫЕ ---
     let score = 0;
     let energy = 0;
     let userId = null;
-    let isLoading = true; // Начинаем в состоянии загрузки
+    let isLoading = true;
     let level = 1;
 
-    // --- ИГРОВЫЕ ПАРАМЕТРЫ (будут загружены с сервера) ---
-    let profitPerHour = 0;
+      let profitPerHour = 0;
     let energyPerSecond = 0;
     const maxEnergy = 100;
-    const scoreToNextLevel = [0, 50000, 150000, 500000];
-    const tapValue = 2;
 
-    // --- ИНИЦИАЛИЗАЦИЯ ---
+    const levelNames = ["", "Homeless", "Street Cat", "Hustler", "Mouser", "Junior Entrepreneur", "Businessman", "Manager", "Tycoon", "Magnate", "Chairman", "Catpitalist", "The Marquess", "King of the Pride", "The Legend", "The Cat-peror"];
+    const scoreToNextLevel = [0, 500, 1500, 4000, 12000, 40000, 150000, 500000, 2000000, 10000000, 50000000, 250000000, 1500000000, 10000000000, 100000000000, 1000000000000];
+    const tapValueLevels = [0, 1, 2, 3, 5, 8, 12, 20, 35, 60, 100, 1000, 5000, 25000, 100000, 500000];
+    const catImageLevels = ["", "CAT0.png", "CAT2.png", /* ... добавьте все 15 имен файлов ... */ "CAT15.png"];
+    let tapValue = 1;
+    
     const tg = window.Telegram.WebApp;
     tg.ready();
     tg.expand();
     
-    // СНАЧАЛА настраиваем слушатели, чтобы они были готовы
     setupEventListeners();
-    // ПОТОМ асинхронно настраиваем пользователя и ждем загрузки данных
     await setupUserAndLoadData(tg);
 
-    // Запускаем игровой цикл ТОЛЬКО ПОСЛЕ загрузки
     setInterval(visualTick, 1000);
 
-    // --- ФУНКЦИИ ---
 
     async function setupUserAndLoadData(tg) {
-        // Закомментировано для продакшена. Раскомментируйте для локального теста.
-        /*
-        if (true) { 
-            userId = 12345678;
-            usernameDisplayElement.innerText = "Local Test";
-            await loadStateFromServer(); // ЖДЕМ загрузки данных
-            return;
-        }
-        */
 
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
             const user = tg.initDataUnsafe.user;
             userId = user.id;
             usernameDisplayElement.innerText = user.username || `${user.first_name} ${user.last_name || ''}`.trim();
-            await loadStateFromServer(); // ЖДЕМ загрузки данных
+            await loadStateFromServer();
         } else {
             usernameDisplayElement.innerText = "Error";
             clickArea.style.pointerEvents = 'none';
-            isLoading = false; // Снимаем блокировку, если Telegram API недоступен
+            isLoading = false;
         }
     }
 
     function setupEventListeners() {
         clickArea.addEventListener('pointerdown', () => {
-            // Проверяем, не идет ли загрузка и достаточно ли энергии
             if (isLoading || Math.floor(energy) < tapValue) {
                 return;
             }
 
             energy -= tapValue;
             score += tapValue;
-            
+
+            checkLevelUp();
             animateCat();
             updateDisplay();
             saveStateToServer();
@@ -87,9 +80,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function visualTick() {
-        if (isLoading) return; // Не обновляем ничего, пока данные не загружены
+        if (isLoading) return;
         
         score += profitPerHour / 3600;
+        checkLevelUp();
 
         if (energy < maxEnergy) {
             energy = Math.min(maxEnergy, energy + energyPerSecond);
@@ -101,13 +95,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     function updateDisplay() {
         scoreElement.innerText = Math.floor(score).toLocaleString('en-US');
         energyLevelElement.innerText = `${Math.floor(energy)}/${maxEnergy}`;
-        
-        const requiredScore = scoreToNextLevel[level] || Infinity;
+
+        tapValue = tapValueLevels[level] || tapValueLevels[tapValueLevels.length - 1];
+        const requiredScore = scoreToNextLevel[level] || scoreToNextLevel[scoreToNextLevel.length - 1];
         const prevLevelScore = scoreToNextLevel[level - 1] || 0;
         const progressForCurrentLevel = score - prevLevelScore;
         const totalProgressNeeded = requiredScore - prevLevelScore;
         let levelProgressPercentage = totalProgressNeeded > 0 ? (progressForCurrentLevel / totalProgressNeeded) * 100 : 0;
+        
         progressBarElement.style.width = `${Math.max(0, Math.min(100, levelProgressPercentage))}%`;
+        tapEarnValue.innerText = `+${tapValue}`;
+        levelUpCost.innerText = formatScore(requiredScore);
+        profitValue.innerText = `+${formatScore(Math.floor(profitPerHour))}`;
+        levelName.innerText = `${levelNames[level]} >`;
+        levelProgressText.innerText = `${level}/15`;
+
+        const catImage = catImageLevels[level] || catImageLevels[catImageLevels.length - 1];
+        if(catImage) catElement.style.backgroundImage = `url('/static/images/${catImage}')`;
     }
     
     function animateCat() {
@@ -119,21 +123,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             isLoading = false;
             return;
         }
-        isLoading = true; // Включаем блокировку перед запросом
+        isLoading = true;
         try {
             const response = await fetch(`/api/get_score/${userId}`);
             const data = await response.json();
             if (response.ok) {
                 score = data.score;
                 energy = data.energy;
+                level = data.level;
                 profitPerHour = data.profit_per_hour;
                 energyPerSecond = data.energy_per_second;
-                updateDisplay(); // Первое отображение данных после загрузки
+                updateDisplay();
             }
         } catch (error) {
             console.error("Error loading state:", error);
         } finally {
-            isLoading = false; // Отключаем блокировку в любом случае
+            isLoading = false;
         }
     }
 
@@ -146,11 +151,27 @@ document.addEventListener('DOMContentLoaded', async () => {
                 body: JSON.stringify({
                     user_id: userId,
                     score: Math.floor(score),
-                    energy: Math.floor(energy)
+                    energy: Math.floor(energy),
+                    level: level
                 }),
             });
         } catch (error) {
             console.error("Error saving state:", error);
         }
+    }
+
+    function checkLevelUp() {
+        if (level >= scoreToNextLevel.length - 1) return;
+        if (score >= scoreToNextLevel[level]) {
+            level++;
+        }
+    }
+
+    function formatScore(num) {
+        if (num < 1000) return num.toString();
+        if (num < 1000000) return (num / 1000).toFixed(1).replace('.0', '') + 'K';
+        if (num < 1000000000) return (num / 1000000).toFixed(1).replace('.0', '') + 'M';
+        if (num < 1000000000000) return (num / 1000000000).toFixed(1).replace('.0', '') + 'B';
+        return (num / 1000000000000).toFixed(1).replace('.0', '') + 'T';
     }
 });
