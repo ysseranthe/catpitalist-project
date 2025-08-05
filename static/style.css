@@ -1,66 +1,206 @@
-/* Стили для всей страницы */
+/* --- Глобальные стили --- */
+:root {
+    --app-bg: #1c1c1e;
+    --ui-bg: #2c2c2e;
+    --text-primary: #ffffff;
+    --text-secondary: #8e8e93;
+    --accent-color: #007aff; /* Пример акцентного цвета */
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 body {
+    background-color: var(--app-bg);
+    font-family: 'Lexend', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--text-primary);
+    overflow: hidden;
+    user-select: none; /* Запрещаем выделение текста во всем приложении */
+}
+
+.app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh; /* Используем dvh для более точного расчета высоты на мобильных */
+    padding: 16px;
+    padding-bottom: 90px; /* Оставляем место для tab bar, чуть больше для безопасности */
+}
+
+/* --- Верхний бар --- */
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--ui-bg);
+    border-radius: 12px;
+    padding: 8px 16px;
+    font-weight: 500;
+}
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.user-info img { width: 24px; height: 24px; }
+
+/* --- Основной контент --- */
+.main-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin-top: 16px;
+    flex-grow: 1; /* Позволяет этому блоку занять все доступное пространство */
+}
+
+/* --- Панель статистики --- */
+.stats-panel {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    gap: 8px;
+}
+.stat-block {
+    background-color: var(--ui-bg);
+    border-radius: 12px;
+    padding: 8px;
+    flex-grow: 1;
+    text-align: center;
+}
+.stat-title {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+.stat-value {
     display: flex;
     justify-content: center;
     align-items: center;
-    flex-direction: column;
-    height: 100vh;
-    margin: 0;
-    background-color: #2c3e50;
-    font-family: Arial, sans-serif;
-    touch-action: manipulation;
+    gap: 4px;
+    font-weight: 700;
+    margin-top: 4px;
 }
+.stat-value img { width: 18px; height: 18px; }
 
+/* --- Основной счет --- */
+.score-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.score-container img {
+    width: 48px;
+    height: 48px;
+}
 #score {
     font-size: 48px;
-    font-weight: bold;
-    margin-bottom: 20px;
-    color: #ffffff;
+    font-weight: 800;
 }
 
-/* Контейнер для кота */
-#cat-container {
-    position: relative; /* Чтобы дочерние элементы позиционировались относительно него */
-    width: 250px;
-    height: 250px;
-}
-
-/* Стили для кота (теперь он некликабельный) */
-#cat {
+/* --- Прогресс-бар --- */
+.level-progress {
     width: 100%;
+}
+.level-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+.progress-bar-background {
+    width: 100%;
+    height: 8px;
+    background-color: var(--ui-bg);
+    border-radius: 4px;
+    overflow: hidden; /* Скрываем все, что выходит за рамки */
+}
+.progress-bar-foreground {
+    width: 10%; /* Пример заполнения */
     height: 100%;
-    background-image: url(images/CAT0.png);
+    background-color: var(--text-primary);
+    border-radius: 4px;
+    transition: width 0.3s ease-in-out; /* Плавная анимация изменения прогресса */
+}
+
+/* --- Кот --- */
+.cat-container {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    position: relative;
+    min-height: 150px; /* Минимальная высота, чтобы кот не исчезал на маленьких экранах */
+}
+.cat-character {
+    width: 80%;
+    max-width: 300px;
+    aspect-ratio: 1 / 1;
+    background-image: url('/static/images/CAT0.png'); /* СТАРТОВЫЙ КОТ */
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
-    transition: transform 0.1s ease; /* Оставляем анимацию для красоты */
-    
-    /* ВАЖНО: Делаем кота "прозрачным" для кликов */
-    pointer-events: none; 
+    transform: scale(1);
+    transition: transform 0.1s ease-out;
 }
-
-/* Стили для невидимой кликабельной области */
 #click-area {
-    position: absolute; /* Накладываем поверх кота */
+    position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    
-    cursor: pointer; /* Курсор-рука будет здесь */
-    
-    /* Запрещаем все возможные браузерные меню */
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    user-select: none;
-    outline: none;
-
-    /* НОВАЯ И САМАЯ ВАЖНАЯ СТРОКА: Делаем подсветку при нажатии полностью прозрачной */
-    -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent; /* Убираем подсветку при тапе */
 }
 
-/* Анимацию нажатия теперь применяем к контейнеру, когда активна наша область */
-@keyframes clickAnimation {
-    from { transform: scale(1); }
-    to { transform: scale(0.9); }
+/* --- Полоса энергии --- */
+.energy-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 18px;
+    font-weight: 700;
+}
+.energy-bar img { width: 24px; height: 24px; }
+
+/* --- Нижнее меню --- */
+.tab-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    background-color: var(--ui-bg);
+    padding: 8px 16px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom)); /* Безопасная зона на iPhone */
+    border-top: 1px solid #3a3a3c;
+}
+.tab-button {
+    background: none;
+    border: none;
+    padding: 8px;
+    border-radius: 12px;
+    transition: background-color 0.2s ease;
+}
+.tab-button:active {
+    background-color: #444; /* Легкая подсветка при физическом нажатии */
+}
+
+/* Стили для ВСЕХ иконок в меню */
+.tab-button img {
+    width: 32px;
+    height: 32px;
+    /* По умолчанию делаем иконки полупрозрачными (серыми) */
+    opacity: 0.5;
+    transition: opacity 0.2s ease;
+}
+
+/* Стиль для иконки ВНУТРИ АКТИВНОЙ кнопки */
+.tab-button.active img {
+    /* Делаем активную иконку полностью непрозрачной (ярко-белой) */
+    opacity: 1;
 }

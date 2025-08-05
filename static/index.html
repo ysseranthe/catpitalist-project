@@ -1,25 +1,112 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Catpitalist</title>
+
+    <!-- Подключение шрифта Lexend из Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700;800&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="/static/style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
 
-    <div id="score">0</div>
+    <div class="app-container">
 
-    <!-- Общий контейнер для кота и невидимой кнопки -->
-    <div id="cat-container">
-        <!-- Наш кот (теперь просто картинка) -->
-        <div id="cat"></div>
-        <!-- НЕВИДИМЫЙ СЛОЙ для кликов поверх кота -->
-        <div id="click-area"></div>
+        <!-- Верхний бар с информацией о пользователе -->
+        <header class="top-bar">
+            <div class="user-info">
+                <img src="/static/images/user.png" alt="User Icon">
+                <span>ckxoidd</span>
+            </div>
+            <div class="game-title">
+                <span>Catpitalist</span>
+            </div>
+        </header>
+
+        <!-- Основной контент страницы -->
+        <main class="main-content">
+
+            <!-- Панель со статистикой -->
+            <section class="stats-panel">
+                <div class="stat-block">
+                    <span class="stat-title">Tap earn</span>
+                    <div class="stat-value">
+                        <img src="/static/images/ctp.png" alt="Coin">
+                        <span>+2</span>
+                    </div>
+                </div>
+                <div class="stat-block">
+                    <span class="stat-title">Catps to level up</span>
+                    <div class="stat-value">
+                        <span>50K</span>
+                    </div>
+                </div>
+                <div class="stat-block">
+                    <span class="stat-title">Profit per hour</span>
+                    <div class="stat-value">
+                        <img src="/static/images/ctp.png" alt="Coin">
+                        <span>+400</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Основной счет -->
+            <section class="score-container">
+                <img src="/static/images/ctp.png" alt="Coin">
+                <span id="score">1.000</span>
+            </section>
+
+            <!-- Прогресс-бар уровня -->
+            <section class="level-progress">
+                <div class="level-info">
+                    <span>Homeless ></span>
+                    <span>1/15</span>
+                </div>
+                <div class="progress-bar-background">
+                    <div id="progress-bar-foreground" class="progress-bar-foreground"></div>
+                </div>
+            </section>
+
+            <!-- Наш кот (кликабельная область) -->
+            <section id="cat-container" class="cat-container">
+                <div id="cat" class="cat-character"></div>
+                <div id="click-area"></div>
+            </section>
+
+            <!-- Полоса энергии -->
+            <section class="energy-bar">
+                <img src="/static/images/power.png" alt="Energy">
+                <span id="energy-level">100/100</span>
+            </section>
+
+        </main>
+
+        <!-- Нижнее меню (Tab Bar) -->
+        <footer class="tab-bar">
+            <button class="tab-button active">
+                <img src="/static/images/productivity.png" alt="Upgrades">
+            </button>
+            <button class="tab-button">
+                <img src="/static/images/briefcase.png" alt="Empire">
+            </button>
+            <button class="tab-button">
+                <img src="/static/images/social.png" alt="Friends">
+            </button>
+            <button class="tab-button">
+                <img src="/static/images/checklist.png" alt="Tasks">
+            </button>
+            <button class="tab-button">
+                <img src="/static/images/link.png" alt="Link">
+            </button>
+        </footer>
+
     </div>
 
     <script src="/static/script.js" defer></script>
-
 </body>
 </html>

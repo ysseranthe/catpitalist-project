@@ -5,69 +5,119 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 import sqlalchemy
 from databases import Database
+import datetime
 
-# --- Настройка ---
-# Получаем URL базы данных из переменных окружения Render
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./test.db")
 
-# Создаем объект для работы с базой данных
 database = Database(DATABASE_URL)
 
-# Описываем структуру нашей таблицы 'users'
 metadata = sqlalchemy.MetaData()
 users = sqlalchemy.Table(
     "users",
     metadata,
     sqlalchemy.Column("user_id", sqlalchemy.BigInteger, primary_key=True),
     sqlalchemy.Column("score", sqlalchemy.BigInteger, default=0),
+    sqlalchemy.Column("energy", sqlalchemy.Integer, default=100),
+    sqlalchemy.Column("last_seen", sqlalchemy.DateTime, default=datetime.datetime.utcnow) 
+
 )
 
-# Создаем приложение FastAPI
 app = FastAPI()
 
-# --- События подключения и отключения от БД ---
 @app.on_event("startup")
 async def startup():
-    # При старте приложения подключаемся к базе данных
     await database.connect()
-    # Создаем таблицу users, если она еще не существует
     engine = sqlalchemy.create_engine(DATABASE_URL)
     metadata.create_all(engine)
 
 @app.on_event("shutdown")
 async def shutdown():
-    # При остановке приложения отключаемся от базы данных
     await database.disconnect()
 
-# --- Модели данных для API ---
 class ScoreData(BaseModel):
     user_id: int
     score: int
+    energy: int
 
-# --- API эндпоинты ---
 @app.get("/api/get_score/{user_id}", response_model=ScoreData)
 async def get_score(user_id: int):
-    """Получает счет пользователя или создает нового, если не найден."""
-    query = users.select().where(users.c.user_id == user_id)
-    user = await database.fetch_one(query)
+    user = await database.fetch_one(users.select().where(users.c.user_id == user_id))
+
     if not user:
-        # Если пользователя нет, создаем его с 0 очков
-        insert_query = users.insert().values(user_id=user_id, score=0)
+        # Создаем нового пользователя
+        insert_query = users.insert().values(user_id=user_id, score=0, energy=100, last_seen=datetime.datetime.utcnow())
         await database.execute(insert_query)
-        return {"user_id": user_id, "score": 0}
-    return user
+        return await database.fetch_one(users.select().where(users.c.user_id == user_id))
 
-@app.post("/api/save_score")
-async def save_score(data: ScoreData):
-    """Обновляет счет пользователя в базе данных."""
-    query = users.update().where(users.c.user_id == data.user_id).values(score=data.score)
-    await database.execute(query)
-    return {"status": "ok", "user_id": data.user_id, "new_score": data.score}
+    # --- ЛОГИКА ОФФЛАЙН ОБНОВЛЕНИЙ ---
+    
+    time_passed_seconds = (datetime.datetime.utcnow() - user['last_seen']).total_seconds()
+    
+    # --- 1. Восстановление энергии ---
+    max_energy = 100
+    energy_per_second = 1
+    energy_regained = int(time_passed_seconds * energy_per_second)
+    new_energy = min(max_energy, user['energy'] + energy_regained)
+    
+    # --- 2. Начисление пассивного дохода ---
+    # <<< ЭТОТ БЛОК МЫ ДОБАВЛЯЕМ
+    profit_per_hour = 400 # В будущем это значение можно будет брать из базы данных
+    profit_per_second = profit_per_hour / 3600
+    profit_gained = time_passed_seconds * profit_per_second
+    new_score = user['score'] + profit_gained
+    # --- КОНЕЦ НОВОГО БЛОКА ---
+    
+    # --- 3. Обновляем все в базе данных ---
+    # СТАЛО
+    update_query = users.update().where(users.c.user_id == user_id).values(
+        score=int(new_score), # <<< ПРЕОБРАЗУЕМ В ЦЕЛОЕ ЧИСЛО
+        energy=new_energy, 
+        last_seen=datetime.datetime.utcnow()
+    )
+    await database.execute(update_query)
 
-# --- Отдача статичных файлов (наша игра) ---
+    # 4. Возвращаем пользователю уже обновленные данные
+    return await database.fetch_one(users.select().where(users.c.user_id == user_id))
+
+@app.post("/api/add_score/{user_id}/{amount}")
+async def add_score(user_id: int, amount: int):
+    try:
+        select_query = users.select().where(users.c.user_id == user_id)
+        user = await database.fetch_one(select_query)
+
+        if user:
+            current_score = user['score']
+            new_score = current_score + amount
+            
+            update_query = users.update().where(users.c.user_id == user_id).values(score=new_score)
+            await database.execute(update_query)
+            
+            print(f"--- SERVER LOG: Added {amount} for user {user_id}. New score: {new_score}")
+            return {"status": "ok", "new_score": new_score}
+        else:
+            print(f"--- SERVER LOG: ERROR - User {user_id} not found when trying to add score.")
+            return {"status": "error", "message": "User not found"}, 404
+
+    except Exception as e:
+        print(f"--- SERVER LOG: CRITICAL ERROR in add_score: {e}")
+        return {"status": "error", "message": "Internal server error"}, 500
+
 static_dir = os.path.join(os.path.dirname(__file__), "static")
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 @app.get("/")
 async def read_root():
     return FileResponse(os.path.join(static_dir, 'index.html'))
+
+@app.post("/api/save_score")
+async def save_score(data: ScoreData):
+    try:
+        query = users.update().where(users.c.user_id == data.user_id).values(score=data.score, energy=data.energy, last_seen=datetime.datetime.utcnow())
+        await database.execute(query)
+        
+        print(f"--- SERVER LOG: Full score saved for user {data.user_id}. New score: {data.score}")
+        return {"status": "ok"}
+    
+    except Exception as e:
+        print(f"--- SERVER LOG: CRITICAL ERROR in save_score: {e}")
+        return {"status": "error", "message": "Internal server error"}, 500
