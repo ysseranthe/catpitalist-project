@@ -66,7 +66,7 @@ async def get_score(user_id: int):
 
     # --- Игровые параметры ---
     max_energy = 100
-    profit_per_hour_levels = [0, 0, 50, 200, 750, 2500, 10000, 40000, 150000, 600000, 2500000, 12000000, 60000000, 300000000, 2000000000, 15000000000]
+    profit_per_hour_levels = [0, 10000, 50, 200, 750, 2500, 10000, 40000, 150000, 600000, 2500000, 12000000, 60000000, 300000000, 2000000000, 15000000000]
     energy_per_second_base = 1
     
     current_level = user['level']
@@ -93,14 +93,35 @@ async def get_score(user_id: int):
 
 @app.post("/api/save_score")
 async def save_score(data: SaveStateRequest):
-    query = users.update().where(users.c.user_id == data.user_id).values(
-        score=data.score,
-        energy=data.energy,
-        level=data.level,
-        last_seen=datetime.datetime.utcnow()
+    # Используем "сырой" SQL-запрос для максимальной надежности
+    query = sqlalchemy.text(
+        """
+        UPDATE users 
+        SET 
+            score = :score, 
+            energy = :energy, 
+            level = :level, 
+            last_seen = :last_seen 
+        WHERE 
+            user_id = :user_id
+        """
     )
-    await database.execute(query)
-    return {"status": "ok"}
+    
+    values = {
+        "score": data.score,
+        "energy": data.energy,
+        "level": data.level,
+        "last_seen": datetime.datetime.utcnow(),
+        "user_id": data.user_id
+    }
+
+    try:
+        await database.execute(query=query, values=values)
+        print(f"--- SERVER LOG: Successfully executed UPDATE for user {data.user_id} with score {data.score}")
+        return {"status": "ok"}
+    except Exception as e:
+        print(f"--- SERVER LOG: CRITICAL ERROR during raw SQL UPDATE: {e}")
+        return {"status": "error"}, 500
 
 
 # --- Отдача статичных файлов ---
