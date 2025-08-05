@@ -1,79 +1,78 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- НАХОДИМ ВСЕ ЭЛЕМЕНТЫ НА СТРАНИЦЕ ---
+    // --- ЭЛЕМЕНТЫ ИНТЕРФЕЙСА ---
     const scoreElement = document.getElementById('score');
     const catElement = document.getElementById('cat');
     const clickArea = document.getElementById('click-area');
     const energyLevelElement = document.getElementById('energy-level');
     const progressBarElement = document.getElementById('progress-bar-foreground');
+    const usernameDisplayElement = document.getElementById('username-display');
     const tabButtons = document.querySelectorAll('.tab-button');
 
     // --- ИГРОВЫЕ ПЕРЕМЕННЫЕ ---
     let score = 0;
-    let isLoading = true;
+    let energy = 0;
     let userId = null;
-    let energy = 100; // Начальная энергия
-    let level = 1; // Наш начальный уровень "Homeless"
+    let isLoading = true;
+    let level = 1;
+
+    // --- ИГРОВЫЕ ПАРАМЕТРЫ (получим с сервера) ---
+    let profitPerHour = 0;
+    let energyPerSecond = 0;
     const maxEnergy = 100;
-    const scoreToNextLevel = [0, 50000, 150000, 500000]; // 0, 50K, 150K, 500K
-    const tapValue = 2; // Сколько очков дает один тап
+    const scoreToNextLevel = [0, 50000, 150000, 500000];
+    const tapValue = 2;
 
-
-    // --- ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ ---
+    // --- ИНИЦИАЛИЗАЦИЯ ---
     const tg = window.Telegram.WebApp;
     tg.ready();
     tg.expand();
-
-    setupUser(tg);
-    setupEventListeners();
-    updateDisplay(); // <<< ВАЖНО: Первый раз обновляем экран при загрузке
     
-    // --- ОСНОВНЫЕ ФУНКЦИИ ---
+    setupUser(tg);
+    setupEventListeners(tg);
+
+    // Запускаем главный игровой цикл (тик), который обновляет интерфейс
+    setInterval(visualTick, 1000);
+
+    // --- ФУНКЦИИ ---
 
     function setupUser(tg) {
-        // --- БЛОК ДЛЯ ЛОКАЛЬНОГО ТЕСТИРОВАНИЯ ---
-        
-        /* if (true) { 
+        // Закомментировано для продакшена. Раскомментируйте для локального теста.
+        /*
+        if (true) { 
             userId = 12345678;
-            console.log(`%cЛОКАЛЬНЫЙ ТЕСТОВЫЙ РЕЖИМ`, 'color: yellow; background: black; padding: 5px;');
-            loadScoreFromServer();
-        } else */
-        
-        // --- КОНЕЦ БЛОКА ---
+            usernameDisplayElement.innerText = "Local Test";
+            loadStateFromServer();
+            return;
+        }
+        */
+
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            userId = tg.initDataUnsafe.user.id;
-            loadScoreFromServer();
+            const user = tg.initDataUnsafe.user;
+            userId = user.id;
+            usernameDisplayElement.innerText = user.username || `${user.first_name} ${user.last_name || ''}`.trim();
+            loadStateFromServer();
         } else {
-            console.warn("Not launched in Telegram.");
-            scoreElement.innerText = "Error";
+            usernameDisplayElement.innerText = "Error";
             clickArea.style.pointerEvents = 'none';
+            isLoading = false;
         }
     }
 
-    function setupEventListeners() {
+    function setupEventListeners(tg) {
         clickArea.addEventListener('pointerdown', () => {
-            // --- ДОБАВЛЯЕМ "ШПИОНОВ" ДЛЯ ОТЛАДКИ ---
-            console.log(`--- Click event --- Current energy: ${energy}, Tap value: ${tapValue}`);
+            if (isLoading || Math.floor(energy) < tapValue) return;
 
-            if (!isLoading && Math.floor(energy) >= tapValue) { // Используем переменную
-                energy -= tapValue;
-                score += tapValue;
-
-                animateCat();
-                updateDisplay();
-                saveScoreToServer();
-            } else {
-                console.log("Not enough energy!");
-                // (Здесь можно добавить анимацию, например, покачивание головой кота)
-            }
+            energy -= tapValue;
+            score += tapValue;
+            
+            animateCat();
+            updateDisplay();
+            saveStateToServer();
         });
 
-        clickArea.addEventListener('pointerup', () => {
-            catElement.style.transform = 'scale(1)';
-        });
-        clickArea.addEventListener('pointerleave', () => {
-            catElement.style.transform = 'scale(1)';
-        });
+        clickArea.addEventListener('pointerup', () => catElement.style.transform = 'scale(1)');
+        clickArea.addEventListener('pointerleave', () => catElement.style.transform = 'scale(1)');
 
         tabButtons.forEach(button => {
             button.addEventListener('click', () => {
@@ -83,66 +82,77 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function updateDisplay() {
-        scoreElement.innerText = Math.floor(score).toLocaleString('en-US'); 
-        energyLevelElement.innerText = `${Math.floor(energy)}/${maxEnergy}`;
+    // ГЛАВНЫЙ ИГРОВОЙ ТИК (вызывается каждую секунду)
+    function visualTick() {
+        if (isLoading) return;
 
-        // --- ЛОГИКА ПРОГРЕСС-БАРА УРОВНЯ ---
+        // Имитируем пассивный доход
+        score += profitPerHour / 3600;
+
+        // Имитируем регенерацию энергии
+        if (energy < maxEnergy) {
+            energy = Math.min(maxEnergy, energy + energyPerSecond);
+        }
+
+        updateDisplay();
+    }
+    
+    function updateDisplay() {
+        scoreElement.innerText = Math.floor(score).toLocaleString('en-US');
+        energyLevelElement.innerText = `${Math.floor(energy)}/${maxEnergy}`;
         
-        // 1. Определяем, сколько очков нужно для текущего уровня и сколько было на предыдущем
-        const requiredScore = scoreToNextLevel[level];
+        const requiredScore = scoreToNextLevel[level] || Infinity;
         const prevLevelScore = scoreToNextLevel[level - 1] || 0;
-        
-        // 2. Вычисляем "чистый" прогресс на текущем уровне
         const progressForCurrentLevel = score - prevLevelScore;
         const totalProgressNeeded = requiredScore - prevLevelScore;
-
-        // 3. Считаем процент, но не даем ему быть больше 100 или меньше 0
-        let levelProgressPercentage = 0;
-        if (totalProgressNeeded > 0) {
-            levelProgressPercentage = (progressForCurrentLevel / totalProgressNeeded) * 100;
-        }
-        
-        // 4. Применяем значение к полоске
+        let levelProgressPercentage = totalProgressNeeded > 0 ? (progressForCurrentLevel / totalProgressNeeded) * 100 : 0;
         progressBarElement.style.width = `${Math.max(0, Math.min(100, levelProgressPercentage))}%`;
     }
-
+    
     function animateCat() {
         catElement.style.transform = 'scale(0.9)';
     }
 
-    async function loadScoreFromServer() {
+    // --- ВЗАИМОДЕЙСТВИЕ С СЕРВЕРОМ ---
+
+    async function loadStateFromServer() {
         if (!userId) {
-            isLoading = false; // Если нет ID, тоже отключаем загрузку
+            isLoading = false;
             return;
-        };
+        }
+        isLoading = true;
         try {
             const response = await fetch(`/api/get_score/${userId}`);
             const data = await response.json();
             if (response.ok) {
+                // Устанавливаем точные значения и скорости, полученные от сервера
                 score = data.score;
                 energy = data.energy;
+                profitPerHour = data.profit_per_hour;
+                energyPerSecond = data.energy_per_second;
                 updateDisplay();
             }
         } catch (error) {
-            console.error("Error loading score:", error);
+            console.error("Error loading state:", error);
         } finally {
-            // Вне зависимости от успеха или ошибки, отключаем состояние загрузки
-            isLoading = false; 
-            console.log("Loading complete. Clicks enabled.");
+            isLoading = false;
         }
     }
 
-    async function saveScoreToServer() {
+    async function saveStateToServer() {
         if (!userId) return;
         try {
             fetch('/api/save_score', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: userId, score: Math.floor(score), energy: Math.floor(energy) }),
+                body: JSON.stringify({
+                    user_id: userId,
+                    score: Math.floor(score),
+                    energy: Math.floor(energy)
+                }),
             });
         } catch (error) {
-            console.error("Error saving score:", error);
+            console.error("Error saving state:", error);
         }
     }
 });
