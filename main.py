@@ -60,35 +60,30 @@ async def get_score(user_id: int):
     user = await database.fetch_one(users.select().where(users.c.user_id == user_id))
 
     if not user:
-        # Если пользователь не найден, создаем его со 100% энергией
         insert_query = users.insert().values(user_id=user_id, score=0, energy=100, level=1, last_seen=datetime.datetime.utcnow())
         await database.execute(insert_query)
         user = await database.fetch_one(users.select().where(users.c.user_id == user_id))
 
-    # --- ИГРОВЫЕ ПАРАМЕТРЫ ---
+    # Игровые параметры
     max_energy = 100
-    profit_per_hour_base = 400 # В будущем будет браться из массива
+    profit_per_hour_levels = [0, 0, 50, 200, 750, 2500, 10000, 40000, 150000, 600000, 2500000, 12000000, 60000000, 300000000, 2000000000, 15000000000]
     energy_per_second_base = 1
-
-    # --- НАДЕЖНЫЕ ОФФЛАЙН РАСЧЕТЫ ---
     
-    # Получаем время последнего визита, обрабатывая случай, если его нет
-    last_seen_time = user.get('last_seen') or datetime.datetime.utcnow()
-    # Убеждаемся, что время в прошлом, чтобы избежать отрицательных значений
-    time_passed_seconds = max(0, (datetime.datetime.utcnow() - last_seen_time).total_seconds())
-
+    # --- НАДЕЖНЫЕ ОФФЛАЙН РАСЧЕТЫ (ИСПРАВЛЕННАЯ ВЕРСИЯ) ---
+    
+    current_level = user['level']
+    profit_per_hour_base = profit_per_hour_levels[current_level] if current_level < len(profit_per_hour_levels) else profit_per_hour_levels[-1]
+    
+    # Расчет прошедшего времени
+    time_passed_seconds = (datetime.datetime.utcnow() - user['last_seen']).total_seconds()
+    
     # 1. Расчет восстановленной энергии
-    current_energy = user.get('energy') or 0 # Получаем энергию, если ее нет - считаем 0
     energy_regained = int(time_passed_seconds * energy_per_second_base)
-    new_energy = min(max_energy, current_energy + energy_regained)
+    new_energy = min(max_energy, user['energy'] + energy_regained)
     
     # 2. Расчет пассивного дохода
-    current_score = user.get('score') or 0
     profit_gained = (profit_per_hour_base / 3600) * time_passed_seconds
-    new_score = current_score + profit_gained
-    
-    # 3. Получаем уровень
-    current_level = user.get('level') or 1
+    new_score = user['score'] + profit_gained
     
     # Возвращаем клиенту полный набор данных
     return {
