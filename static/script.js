@@ -33,11 +33,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function setupUser(tg) {
         // --- БЛОК ДЛЯ ЛОКАЛЬНОГО ТЕСТИРОВАНИЯ ---
         
-        if (true) { 
+        /* if (true) { 
             userId = 12345678;
             console.log(`%cЛОКАЛЬНЫЙ ТЕСТОВЫЙ РЕЖИМ`, 'color: yellow; background: black; padding: 5px;');
             loadScoreFromServer();
-        } else 
+        } else */
         
         // --- КОНЕЦ БЛОКА ---
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
