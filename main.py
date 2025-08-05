@@ -67,7 +67,7 @@ async def get_score(user_id: int):
     # --- Игровые параметры ---
     max_energy = 100
     profit_per_hour_levels = [0, 0, 50, 200, 750, 2500, 10000, 40000, 150000, 600000, 2500000, 12000000, 60000000, 300000000, 2000000000, 15000000000]
-    energy_per_second_base = 1
+    energy_per_second_base = 100
     
     # --- ИСПРАВЛЕНИЕ: БЕРЕМ АКТУАЛЬНЫЙ УРОВЕНЬ ИЗ БАЗЫ ---
     current_level = user['level']
