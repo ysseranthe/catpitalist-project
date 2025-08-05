@@ -18,6 +18,7 @@ users = sqlalchemy.Table(
     sqlalchemy.Column("user_id", sqlalchemy.BigInteger, primary_key=True),
     sqlalchemy.Column("score", sqlalchemy.Integer, default=0),
     sqlalchemy.Column("energy", sqlalchemy.Integer, default=100),
+    sqlalchemy.Column("level", sqlalchemy.Integer, default=1),
     sqlalchemy.Column("last_seen", sqlalchemy.DateTime, default=datetime.datetime.utcnow)
 )
 
@@ -41,6 +42,7 @@ class GameStateResponse(BaseModel):
     user_id: int
     score: int
     energy: int
+    level: int
     profit_per_hour: int
     energy_per_second: int
 
@@ -49,6 +51,7 @@ class SaveStateRequest(BaseModel):
     user_id: int
     score: int
     energy: int
+    level: int
 
 # --- API ЭНДПОИНТЫ ---
 
@@ -65,6 +68,9 @@ async def get_score(user_id: int):
     max_energy = 100
     profit_per_hour_base = 400
     energy_per_second_base = 1
+    profit_per_hour_levels = [0, 0, 50, 200, 750, 2500, 10000, 40000, 150000, 600000, 2500000, 12000000, 60000000, 300000000, 2000000000, 15000000000]
+    current_level = user['level']
+    profit_per_hour_base = profit_per_hour_levels[current_level] if current_level < len(profit_per_hour_levels) else profit_per_hour_levels[-1]
 
     # Офлайн расчеты
     time_passed_seconds = (datetime.datetime.utcnow() - user['last_seen']).total_seconds()
@@ -78,6 +84,7 @@ async def get_score(user_id: int):
         "user_id": user_id,
         "score": int(new_score),
         "energy": new_energy,
+        "level": current_level,
         "profit_per_hour": profit_per_hour_base,
         "energy_per_second": energy_per_second_base,
     }
@@ -87,6 +94,7 @@ async def save_score(data: SaveStateRequest):
     query = users.update().where(users.c.user_id == data.user_id).values(
         score=data.score,
         energy=data.energy,
+        level=data.level,
         last_seen=datetime.datetime.utcnow()
     )
     await database.execute(query)
