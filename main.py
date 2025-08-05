@@ -64,17 +64,15 @@ async def get_score(user_id: int):
         await database.execute(insert_query)
         user = await database.fetch_one(users.select().where(users.c.user_id == user_id))
 
-    # Игровые параметры
+    # --- Игровые параметры ---
     max_energy = 100
     profit_per_hour_levels = [0, 0, 50, 200, 750, 2500, 10000, 40000, 150000, 600000, 2500000, 12000000, 60000000, 300000000, 2000000000, 15000000000]
     energy_per_second_base = 1
     
-    # --- НАДЕЖНЫЕ ОФФЛАЙН РАСЧЕТЫ (ИСПРАВЛЕННАЯ ВЕРСИЯ) ---
-    
     current_level = user['level']
     profit_per_hour_base = profit_per_hour_levels[current_level] if current_level < len(profit_per_hour_levels) else profit_per_hour_levels[-1]
     
-    # Расчет прошедшего времени
+    # --- ОФФЛАЙН РАСЧЕТЫ ---
     time_passed_seconds = (datetime.datetime.utcnow() - user['last_seen']).total_seconds()
     
     # 1. Расчет восстановленной энергии
@@ -85,6 +83,17 @@ async def get_score(user_id: int):
     profit_gained = (profit_per_hour_base / 3600) * time_passed_seconds
     new_score = user['score'] + profit_gained
     
+    # --- ВАЖНОЕ ИЗМЕНЕНИЕ: СОХРАНЯЕМ ОФЛАЙН-ПРОГРЕСС ---
+    # Мы обновляем базу данных новыми, рассчитанными значениями ПЕРЕД тем, как отдать их клиенту
+    update_query = users.update().where(users.c.user_id == user_id).values(
+        score=int(new_score),
+        energy=new_energy,
+        # Мы НЕ обновляем уровень здесь, уровень обновляется только клиентом
+        last_seen=datetime.datetime.utcnow()
+    )
+    await database.execute(update_query)
+    # --- КОНЕЦ ИЗМЕНЕНИЯ ---
+
     # Возвращаем клиенту полный набор данных
     return {
         "user_id": user_id,
