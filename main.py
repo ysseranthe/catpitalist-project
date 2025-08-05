@@ -67,9 +67,8 @@ async def get_score(user_id: int):
     # --- Игровые параметры ---
     max_energy = 100
     profit_per_hour_levels = [0, 0, 50, 200, 750, 2500, 10000, 40000, 150000, 600000, 2500000, 12000000, 60000000, 300000000, 2000000000, 15000000000]
-    energy_per_second_base = 10
+    energy_per_second_base = 1
     
-    # --- ИСПРАВЛЕНИЕ: БЕРЕМ АКТУАЛЬНЫЙ УРОВЕНЬ ИЗ БАЗЫ ---
     current_level = user['level']
     profit_per_hour_base = profit_per_hour_levels[current_level] if current_level < len(profit_per_hour_levels) else profit_per_hour_levels[-1]
     
@@ -82,12 +81,12 @@ async def get_score(user_id: int):
     profit_gained = (profit_per_hour_base / 3600) * time_passed_seconds
     new_score = user['score'] + profit_gained
     
-    # Возвращаем клиенту АКТУАЛЬНЫЙ уровень из базы
+    # Эта функция больше НЕ сохраняет, а только отдает рассчитанные значения
     return {
         "user_id": user_id,
         "score": int(new_score),
         "energy": new_energy,
-        "level": current_level, # <<< Вот ключевой момент
+        "level": current_level,
         "profit_per_hour": profit_per_hour_base,
         "energy_per_second": energy_per_second_base,
     }
