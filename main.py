@@ -75,26 +75,13 @@ async def get_score(user_id: int):
     # --- ОФФЛАЙН РАСЧЕТЫ ---
     time_passed_seconds = (datetime.datetime.utcnow() - user['last_seen']).total_seconds()
     
-    # 1. Расчет восстановленной энергии
     energy_regained = int(time_passed_seconds * energy_per_second_base)
     new_energy = min(max_energy, user['energy'] + energy_regained)
     
-    # 2. Расчет пассивного дохода
     profit_gained = (profit_per_hour_base / 3600) * time_passed_seconds
     new_score = user['score'] + profit_gained
     
-    # --- ВАЖНОЕ ИЗМЕНЕНИЕ: СОХРАНЯЕМ ОФЛАЙН-ПРОГРЕСС ---
-    # Мы обновляем базу данных новыми, рассчитанными значениями ПЕРЕД тем, как отдать их клиенту
-    update_query = users.update().where(users.c.user_id == user_id).values(
-        score=int(new_score),
-        energy=new_energy,
-        # Мы НЕ обновляем уровень здесь, уровень обновляется только клиентом
-        last_seen=datetime.datetime.utcnow()
-    )
-    await database.execute(update_query)
-    # --- КОНЕЦ ИЗМЕНЕНИЯ ---
-
-    # Возвращаем клиенту полный набор данных
+    # Эта функция больше НЕ сохраняет, а только отдает рассчитанные значения
     return {
         "user_id": user_id,
         "score": int(new_score),
