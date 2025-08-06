@@ -57,42 +57,47 @@ class SaveStateRequest(BaseModel):
 
 @app.get("/api/get_score/{user_id}", response_model=GameStateResponse)
 async def get_score(user_id: int):
+    print(f"\n--- 1. GET_SCORE START for user_id: {user_id} ---")
     user = await database.fetch_one(users.select().where(users.c.user_id == user_id))
+    print(f"--- 2. Fetched user from DB. Result: {user} ---")
 
-    # --- Игровые параметры, которые нужны всегда ---
+    # --- Игровые параметры ---
     max_energy = 100
     profit_per_hour_levels = [0, 0, 50, 200, 750, 2500, 10000, 40000, 150000, 600000, 2500000, 12000000, 60000000, 300000000, 2000000000, 15000000000]
     energy_per_second_base = 1
     
     # --- РЕГИСТРАЦИЯ НОВОГО ПОЛЬЗОВАТЕЛЯ ---
     if not user:
+        print(f"--- 3. User NOT FOUND. Creating a new user. ---")
         insert_query = users.insert().values(user_id=user_id, score=0, energy=100, level=1, last_seen=datetime.datetime.utcnow())
         await database.execute(insert_query)
-        
-        # Возвращаем стартовые данные для 1-го уровня и выходим из функции
+        print(f"--- 4. NEW USER CREATED. Returning start data. ---")
         return {
-            "user_id": user_id,
-            "score": 0,
-            "energy": 100,
-            "level": 1,
+            "user_id": user_id, "score": 0, "energy": 100, "level": 1,
             "profit_per_hour": profit_per_hour_levels[1],
             "energy_per_second": energy_per_second_base,
         }
 
     # --- ЛОГИКА ДЛЯ СУЩЕСТВУЮЩЕГО ПОЛЬЗОВАТЕЛЯ ---
+    print(f"--- 3. User FOUND. Starting offline calculations. ---")
     
     current_level = user['level']
     profit_per_hour_base = profit_per_hour_levels[current_level] if current_level < len(profit_per_hour_levels) else profit_per_hour_levels[-1]
+    
+    last_seen = user['last_seen']
+    time_now = datetime.datetime.utcnow()
+    time_passed_seconds = (time_now - last_seen).total_seconds()
+    print(f"--- 4. Last seen: {last_seen}, Now: {time_now}, Seconds passed: {time_passed_seconds:.2f} ---")
 
     # Офлайн расчеты
-    time_passed_seconds = (datetime.datetime.utcnow() - user['last_seen']).total_seconds()
     energy_regained = int(time_passed_seconds * energy_per_second_base)
     new_energy = min(max_energy, user['energy'] + energy_regained)
-    
     profit_gained = (profit_per_hour_base / 3600) * time_passed_seconds
     new_score = user['score'] + profit_gained
-    
+    print(f"--- 5. Calculated new state: Score={new_score:.2f}, Energy={new_energy} ---")
+
     # Эта функция НЕ сохраняет, а только отдает рассчитанные значения
+    print(f"--- 6. Returning calculated state to client. NO UPDATE executed. ---")
     return {
         "user_id": user_id,
         "score": int(new_score),
