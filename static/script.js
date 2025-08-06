@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     // --- ЭЛЕМЕНТЫ ИНТЕРФЕЙСА ---
     const scoreElement = document.getElementById('score');
-    const catElement = document.getElementById('cat');
+    const catImageElement = document.querySelector('.cat-image');
     const clickArea = document.getElementById('click-area');
     const energyLevelElement = document.getElementById('energy-level');
     const progressBarElement = document.getElementById('progress-bar-foreground');
@@ -51,15 +51,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- ФУНКЦИИ ---
 
     async function setupUserAndLoadData(tg) {
-        // Закомментировано для продакшена. Раскомментируйте для локального теста.
-        /*
-        if (true) { 
-            userId = 12345678;
-            usernameDisplayElement.innerText = "Local Test";
-            await loadStateFromServer(); // ЖДЕМ загрузки данных
-            return;
-        }
-        */
 
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
             const user = tg.initDataUnsafe.user;
@@ -89,8 +80,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             saveStateToServer();
         });
 
-        clickArea.addEventListener('pointerup', () => catElement.style.transform = 'scale(1)');
-        clickArea.addEventListener('pointerleave', () => catElement.style.transform = 'scale(1)');
+        clickArea.addEventListener('pointerup', () => catImageElement.style.transform = 'scale(1)');
+        clickArea.addEventListener('pointerleave', () => catImageElement.style.transform = 'scale(1)');
 
         tabButtons.forEach(button => {
             button.addEventListener('click', () => {
@@ -138,12 +129,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             levelProgressText.innerText = `${level}/15`;
 
             const catImage = catImageLevels[level] || catImageLevels[catImageLevels.length - 1];
-            if(catImage) catElement.style.backgroundImage = `url('/static/images/${catImage}')`;
+            if(catImage) catImageElement.style.backgroundImage = `url('/static/images/${catImage}')`;
         }
     }
     
     function animateCat() {
-        catElement.style.transform = 'scale(0.9)';
+        catImageElement.style.transform = 'scale(0.9)';
     }
 
     async function loadStateFromServer() {

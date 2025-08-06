@@ -138,21 +138,33 @@ body {
     justify-content: center;
     width: 100%;
     position: relative;
-    min-height: 150px; /* Минимальная высота, чтобы кот не исчезал на маленьких экранах */
+    min-height: 150px;
 }
+
+/* Внешний контейнер - отвечает ТОЛЬКО ЗА СВЕЧЕНИЕ */
 .cat-character {
     width: 80%;
     max-width: 300px;
     aspect-ratio: 1 / 1;
-    background-image: url('/static/images/CAT0.png'); /* СТАРТОВЫЙ КОТ */
+    
+    /* Свечение применяется сюда и остается статичным */
+    filter: drop-shadow(0 0 75px rgba(255, 255, 255, 0.6));
+}
+
+/* НОВЫЙ БЛОК: Внутренний элемент - отвечает ТОЛЬКО ЗА КАРТИНКУ И АНИМАЦИЮ */
+.cat-image {
+    width: 100%;
+    height: 100%;
+    background-image: url('/static/images/CAT0.png');
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
+
+    /* Начальное состояние и плавный переход */
     transform: scale(1);
     transition: transform 0.1s ease-out;
-    filter: drop-shadow(0 0 100px rgba(255, 255, 255, 0.7));
-
 }
+
 #click-area {
     position: absolute;
     top: 0;
@@ -160,7 +172,7 @@ body {
     width: 100%;
     height: 100%;
     cursor: pointer;
-    -webkit-tap-highlight-color: transparent; /* Убираем подсветку при тапе */
+    -webkit-tap-highlight-color: transparent;
 }
 
 /* --- Полоса энергии --- */
@@ -199,6 +211,7 @@ body {
     flex-direction: column; /* Элементы внутри (иконка, текст) будут идти сверху вниз */
     align-items: center;    /* Выравниваем их по центру */
     gap: 4px;               /* Добавляем небольшой отступ между иконкой и текстом */
+    flex: 1;
 }
 
 .tab-button:active {
