@@ -17,13 +17,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     
     // --- ИГРОВЫЕ ПЕРЕМЕННЫЕ ---
-    let score = 0;
+      let score = 0;
     let energy = 0;
     let userId = null;
-    let isLoading = true; // Начинаем в состоянии загрузки
+    let isLoading = true;
     let level = 1;
-
-    // --- ИГРОВЫЕ ПАРАМЕТРЫ (будут загружены с сервера) ---
     let profitPerHour = 0;
     let energyPerSecond = 0;
     const maxEnergy = 100;
@@ -33,7 +31,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const levelNames = ["", "Homeless", "Street Cat", "Hustler", "Mouser", "Junior Entrepreneur", "Businessman", "Manager", "Tycoon", "Magnate", "Chairman", "Catpitalist", "The Marquess", "King of the Pride", "The Legend", "The Cat-peror"];
     const tapValueLevels = [0, 1, 2, 3, 5, 8, 12, 20, 35, 60, 100, 1000, 5000, 25000, 100000, 500000];
     const profitPerHourLevels = [0, 0, 50, 200, 750, 2500, 10000, 40000, 150000, 600000, 2500000, 12000000, 60000000, 300000000, 2000000000, 15000000000];
-    const catImageLevels = ["", "CAT0.png", "CAT2.png", "CAT3.png", "CAT4.png", "CAT5.png", "CAT6.png", "CAT7.png"];
+    const catImageLevels = ["", "CAT0.png", "CAT2.png", "CAT3.png", "CAT4.png", "CAT5.png", "CAT6.png", ""];
     
     // --- ИНИЦИАЛИЗАЦИЯ ---
     const tg = window.Telegram.WebApp;
@@ -156,12 +154,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             const response = await fetch(`/api/get_score/${userId}`);
             const data = await response.json();
             if (response.ok) {
-                score = data.score;
-                energy = data.energy;
-                level = data.level;
-                profitPerHour = data.profit_per_hour;
-                energyPerSecond = data.energy_per_second;
-                updateDisplay(); // Первое отображение данных после загрузки
+                // Принудительно преобразуем в числа, чтобы избежать ошибок типов
+                score = Number(data.score) || 0;
+                energy = Number(data.energy) || 0;
+                level = Number(data.level) || 1;
+                profitPerHour = Number(data.profit_per_hour) || 0;
+                energyPerSecond = Number(data.energy_per_second) || 0;
             }
         } catch (error) {
             console.error("Error loading state:", error);
@@ -187,6 +185,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function saveStateToServer() {
         if (!userId) return;
+        console.log(`>>> SAVING TO SERVER: score=${Math.floor(score)}, energy=${Math.floor(energy)}, level=${level}`);
         try {
             fetch('/api/save_score', {
                 method: 'POST',
