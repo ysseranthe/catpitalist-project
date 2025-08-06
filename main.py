@@ -59,33 +59,40 @@ class SaveStateRequest(BaseModel):
 async def get_score(user_id: int):
     user = await database.fetch_one(users.select().where(users.c.user_id == user_id))
 
-    if not user:
-        insert_query = users.insert().values(
-            user_id=user_id,
-            score=0,
-            energy=100,
-            level=1,
-            last_seen=datetime.datetime.utcnow()
-        )
-        await database.execute(insert_query)
-        user = await database.fetch_one(users.select().where(users.c.user_id == user_id))
-
-    # Игровые параметры (в будущем их можно будет хранить в БД)
+    # --- Игровые параметры, которые нужны всегда ---
     max_energy = 100
-    energy_per_second_base = 1
-    current_level = user['level']
     profit_per_hour_levels = [0, 0, 50, 200, 750, 2500, 10000, 40000, 150000, 600000, 2500000, 12000000, 60000000, 300000000, 2000000000, 15000000000]
+    energy_per_second_base = 1
+    
+    # --- РЕГИСТРАЦИЯ НОВОГО ПОЛЬЗОВАТЕЛЯ ---
+    if not user:
+        insert_query = users.insert().values(user_id=user_id, score=0, energy=100, level=1, last_seen=datetime.datetime.utcnow())
+        await database.execute(insert_query)
+        
+        # Возвращаем стартовые данные для 1-го уровня и выходим из функции
+        return {
+            "user_id": user_id,
+            "score": 0,
+            "energy": 100,
+            "level": 1,
+            "profit_per_hour": profit_per_hour_levels[1],
+            "energy_per_second": energy_per_second_base,
+        }
+
+    # --- ЛОГИКА ДЛЯ СУЩЕСТВУЮЩЕГО ПОЛЬЗОВАТЕЛЯ ---
+    
+    current_level = user['level']
     profit_per_hour_base = profit_per_hour_levels[current_level] if current_level < len(profit_per_hour_levels) else profit_per_hour_levels[-1]
 
-    
     # Офлайн расчеты
     time_passed_seconds = (datetime.datetime.utcnow() - user['last_seen']).total_seconds()
     energy_regained = int(time_passed_seconds * energy_per_second_base)
     new_energy = min(max_energy, user['energy'] + energy_regained)
+    
     profit_gained = (profit_per_hour_base / 3600) * time_passed_seconds
     new_score = user['score'] + profit_gained
     
-    # Возвращаем полный набор данных для "предсказательной" модели клиента
+    # Эта функция НЕ сохраняет, а только отдает рассчитанные значения
     return {
         "user_id": user_id,
         "score": int(new_score),
