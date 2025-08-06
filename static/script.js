@@ -51,6 +51,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- ФУНКЦИИ ---
 
     async function setupUserAndLoadData(tg) {
+        // Закомментировано для продакшена. Раскомментируйте для локального теста.
+        /*
+        if (true) { 
+            userId = 12345678;
+            usernameDisplayElement.innerText = "Local Test";
+            await loadStateFromServer(); // ЖДЕМ загрузки данных
+            return;
+        }
+        */
 
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
             const user = tg.initDataUnsafe.user;
@@ -80,12 +89,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             saveStateToServer();
         });
 
-        clickArea.addEventListener('pointerup', () => {
-            catElement.style.backgroundSize = 'contain, calc(100% + 10px)';
-        });
-        clickArea.addEventListener('pointerleave', () => {
-            catElement.style.backgroundSize = 'contain, calc(100% + 10px)';
-        });
+        clickArea.addEventListener('pointerup', () => catElement.style.transform = 'scale(1)');
+        clickArea.addEventListener('pointerleave', () => catElement.style.transform = 'scale(1)');
 
         tabButtons.forEach(button => {
             button.addEventListener('click', () => {
@@ -133,14 +138,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             levelProgressText.innerText = `${level}/15`;
 
             const catImage = catImageLevels[level] || catImageLevels[catImageLevels.length - 1];
-            if(catImage) {
-                catElement.style.backgroundImage = `url('/static/images/${catImage}'), url('/static/images/${catImage}')`;
-            }
+            if(catImage) catElement.style.backgroundImage = `url('/static/images/${catImage}')`;
         }
     }
     
     function animateCat() {
-        catElement.style.backgroundSize = '85%, calc(100% + 10px)';
+        catElement.style.transform = 'scale(0.9)';
     }
 
     async function loadStateFromServer() {
