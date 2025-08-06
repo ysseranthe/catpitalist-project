@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const levelNames = ["", "Homeless", "Street Cat", "Hustler", "Mouser", "Junior Entrepreneur", "Businessman", "Manager", "Tycoon", "Magnate", "Chairman", "Catpitalist", "The Marquess", "King of the Pride", "The Legend", "The Cat-peror"];
     const tapValueLevels = [0, 1, 2, 3, 5, 8, 12, 20, 35, 60, 100, 1000, 5000, 25000, 100000, 500000];
     const profitPerHourLevels = [0, 0, 50, 200, 750, 2500, 10000, 40000, 150000, 600000, 2500000, 12000000, 60000000, 300000000, 2000000000, 15000000000];
-    const catImageLevels = ["", "CAT0.png", "CAT2.png", "CAT3.png"];
+    const catImageLevels = ["", "CAT0.png", "CAT2.png", "CAT3.png", "CAT4.png", "CAT5.png", "CAT6.png", "CAT7.png"];
     
     // --- ИНИЦИАЛИЗАЦИЯ ---
     const tg = window.Telegram.WebApp;
