@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const levelNames = ["", "Homeless", "Street Cat", "Hustler", "Mouser", "Junior Entrepreneur", "Businessman", "Manager", "Tycoon", "Magnate", "Chairman", "Catpitalist", "The Marquess", "King of the Pride", "The Legend", "The Cat-peror"];
     const tapValueLevels = [0, 1, 2, 3, 5, 8, 12, 20, 35, 60, 100, 1000, 5000, 25000, 100000, 500000];
+    const profitPerHourLevels = [0, 0, 50, 200, 750, 2500, 10000, 40000, 150000, 600000, 2500000, 12000000, 60000000, 300000000, 2000000000, 15000000000];
     const catImageLevels = ["", "CAT0.png", "CAT2.png", "CAT3.png"];
     
     // --- ИНИЦИАЛИЗАЦИЯ ---
@@ -123,7 +124,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!isLoading) {
             tapValue = tapValueLevels[level] || tapValueLevels[tapValueLevels.length - 1];
             const requiredScore = scoreToNextLevel[level] || scoreToNextLevel[scoreToNextLevel.length - 1];
-            
+            profitPerHour = profitPerHourLevels[level] || profitPerHourLevels[profitPerHourLevels.length - 1];
             // --- ПРОСТАЯ ЛОГИКА ПРОГРЕСС-БАРА, ЗАВИСЯЩАЯ ОТ БАЛАНСА ---
             const levelProgressPercentage = requiredScore > 0 ? (score / requiredScore) * 100 : 0;
             progressBarElement.style.width = `${Math.min(100, levelProgressPercentage)}%`;
