@@ -109,14 +109,26 @@ async def get_score(user_id: int):
 
 @app.post("/api/save_score")
 async def save_score(data: SaveStateRequest):
-    query = users.update().where(users.c.user_id == data.user_id).values(
-        score=data.score,
-        energy=data.energy,
-        level=data.level,
-        last_seen=datetime.datetime.utcnow()
-    )
-    await database.execute(query)
-    return {"status": "ok"}
+    try:
+        # Принудительно преобразуем типы, чтобы быть на 100% уверенными
+        user_id_val = int(data.user_id)
+        score_val = int(data.score)
+        energy_val = int(data.energy)
+        level_val = int(data.level)
+        last_seen_val = datetime.datetime.utcnow()
+
+        query = users.update().where(users.c.user_id == user_id_val).values(
+            score=score_val,
+            energy=energy_val,
+            level=level_val,
+            last_seen=last_seen_val
+        )
+        await database.execute(query)
+        print(f"--- SAVE_SCORE SUCCESS for user {user_id_val}: score={score_val}, energy={energy_val}, level={level_val}")
+        return {"status": "ok"}
+    except Exception as e:
+        print(f"--- SAVE_SCORE CRITICAL ERROR: {e} ---")
+        return {"status": "error"}, 500
 
 
 # --- Отдача статичных файлов ---
