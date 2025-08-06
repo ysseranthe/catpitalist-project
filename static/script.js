@@ -45,13 +45,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- 4. ОСНОВНЫЕ ИГРОВЫЕ ФУНКЦИИ ---
 
-    const updateDisplay = () => {
+     const updateDisplay = () => {
         elements.score.innerText = Math.floor(gameState.score).toLocaleString('en-US');
         elements.energyLevel.innerText = `${Math.floor(gameState.energy)}/${config.maxEnergy}`;
 
         if (!gameState.isLoading) {
+            // Пересчитываем только tapValue
             gameState.tapValue = config.tapValueLevels[gameState.level] || config.tapValueLevels.at(-1);
-            gameState.profitPerHour = config.profitPerHourLevels[gameState.level] || config.profitPerHourLevels.at(-1);
             
             const requiredScore = config.scoreToNextLevel[gameState.level] || Infinity;
             const levelProgressPercentage = requiredScore > 0 ? (gameState.score / requiredScore) * 100 : 0;
@@ -59,7 +59,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             elements.progressBar.style.width = `${Math.min(100, levelProgressPercentage)}%`;
             elements.tapEarnValue.innerText = `+${gameState.tapValue}`;
             elements.levelUpCost.innerText = formatScore(requiredScore);
+            
+            // Отображаем profitPerHour, НЕ пересчитывая его
             elements.profitValue.innerText = `+${formatScore(Math.floor(gameState.profitPerHour))}`;
+            
             elements.levelName.innerText = `${config.levelNames[gameState.level]} >`;
             elements.levelProgressText.innerText = `${gameState.level}/15`;
 
@@ -70,20 +73,29 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const checkLevelUp = () => {
         if (gameState.level >= config.scoreToNextLevel.length - 1) return;
+        
         if (gameState.score >= config.scoreToNextLevel[gameState.level]) {
             gameState.level++;
+            // ОБНОВЛЯЕМ ПАРАМЕТРЫ ПРИ ПОВЫШЕНИИ УРОВНЯ
+            gameState.profitPerHour = config.profitPerHourLevels[gameState.level] || config.profitPerHourLevels.at(-1);
         }
     };
 
     const visualTick = () => {
         if (gameState.isLoading) return;
 
-        // Отвечает ТОЛЬКО за регенерацию энергии
+        // Возвращаем начисление пассивного дохода
+        const profitPerTick = gameState.profitPerHour / 3600;
+        gameState.score += profitPerTick;
+
         if (gameState.energy < config.maxEnergy) {
             gameState.energy = Math.min(config.maxEnergy, gameState.energy + gameState.energyPerSecond);
         }
         
-        // Обновляем только дисплей, не меняя счет
+        // Проверяем уровень после начисления
+        checkLevelUp();
+        
+        // Обновляем отображение
         updateDisplay();
     };
 
@@ -113,6 +125,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 gameState.level = data.level;
                 gameState.profitPerHour = data.profit_per_hour;
                 gameState.energyPerSecond = data.energy_per_second;
+
+                checkLevelUp();
             }
         } catch (error) { console.error("Error loading state:", error); }
         finally {
