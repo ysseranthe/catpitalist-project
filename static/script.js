@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    initializeVariables();
-    // --- ЭЛЕМЕНТЫ ИНТЕРФЕЙСА ---
+    // --- 1. СНАЧАЛА НАХОДИМ ВСЕ ЭЛЕМЕНТЫ ---
     const scoreElement = document.getElementById('score');
     const catElement = document.getElementById('cat');
     const clickArea = document.getElementById('click-area');
@@ -16,12 +15,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     const loaderScreen = document.getElementById('loader-screen');
     const appContainer = document.getElementById('app-container');
 
+    // --- 2. ОБЪЯВЛЯЕМ КОНСТАНТЫ И ПЕРЕМЕННЫЕ ---
+    let score, energy, userId, isLoading, level, profitPerHour, energyPerSecond, tapValue;
     
-    // --- ИГРОВЫЕ ПЕРЕМЕННЫЕ ---
-    let score, energy, userId, isLoading, level, profitPerHour, energyPerSecond;
+    const maxEnergy = 100;
+    const levelNames = ["", "Homeless", "Street Cat", "Hustler", "Mouser", "Junior Entrepreneur", "Businessman", "Manager", "Tycoon", "Magnate", "Chairman", "Catpitalist", "The Marquess", "King of the Pride", "The Legend", "The Cat-peror"];
+    const scoreToNextLevel = [0, 500, 1500, 4000, 12000, 40000, 150000, 500000, 2000000, 10000000, 50000000, 250000000, 1500000000, 10000000000, 100000000000, 1000000000000];
+    const tapValueLevels = [0, 1, 2, 3, 5, 8, 12, 20, 35, 60, 100, 1000, 5000, 25000, 100000, 500000];
+    const profitPerHourLevels = [0, 0, 50, 200, 750, 2500, 10000, 40000, 150000, 600000, 2500000, 12000000, 60000000, 300000000, 2000000000, 15000000000];
+    const catImageLevels = ["", "CAT0.png", "CAT2.png", "CAT3.png", "CAT4.png", "CAT5.png", "CAT6.png", "CAT7.png"];
 
+    // --- 3. ФУНКЦИЯ ДЛЯ СБРОСА ПЕРЕМЕННЫХ ---
     function initializeVariables() {
-        console.log("--- Initializing all game variables to default ---");
         score = 0;
         energy = 0;
         userId = null;
@@ -29,28 +34,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         level = 1;
         profitPerHour = 0;
         energyPerSecond = 0;
+        tapValue = 1;
     }
 
-    const maxEnergy = 100;
-    const scoreToNextLevel = [0, 500, 1500, 4000, 12000, 40000, 150000, 500000, 2000000, 10000000, 50000000, 250000000, 1500000000, 10000000000, 100000000000, 1000000000000];
-    let tapValue = 1;
-
-    const levelNames = ["", "Homeless", "Street Cat", "Hustler", "Mouser", "Junior Entrepreneur", "Businessman", "Manager", "Tycoon", "Magnate", "Chairman", "Catpitalist", "The Marquess", "King of the Pride", "The Legend", "The Cat-peror"];
-    const tapValueLevels = [0, 1, 2, 3, 5, 8, 12, 20, 35, 60, 100, 1000, 5000, 25000, 100000, 500000];
-    const profitPerHourLevels = [0, 0, 50, 200, 750, 2500, 10000, 40000, 150000, 600000, 2500000, 12000000, 60000000, 300000000, 2000000000, 15000000000];
-    const catImageLevels = ["", "CAT0.png", "CAT2.png", "CAT3.png", "CAT4.png", "CAT5.png", "CAT6.png", ""];
-    
-    // --- ИНИЦИАЛИЗАЦИЯ ---
+    // --- 4. ЗАПУСКАЕМ ИНИЦИАЛИЗАЦИЮ ---
+    initializeVariables(); // Теперь вызов идет ПОСЛЕ объявления
     const tg = window.Telegram.WebApp;
     tg.ready();
     tg.expand();
     
-    // СНАЧАЛА настраиваем слушатели, чтобы они были готовы
     setupEventListeners();
-    // ПОТОМ асинхронно настраиваем пользователя и ждем загрузки данных
     await setupUserAndLoadData(tg);
 
-    // Запускаем игровой цикл ТОЛЬКО ПОСЛЕ загрузки
     setInterval(visualTick, 1000);
 
     // --- ФУНКЦИИ ---
