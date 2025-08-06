@@ -225,3 +225,47 @@ body {
 .tab-button.active span {
     color: var(--text-primary); /* Активное название - белое */
 }
+
+.loader-screen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--app-bg); /* Тот же фон, что и у игры */
+    z-index: 100; /* Убеждаемся, что он поверх всего */
+    transition: opacity 0.5s ease; /* Плавное исчезновение */
+}
+
+.spinner {
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top: 4px solid #fff;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.hidden {
+    display: none !important; /* !important, чтобы перебить другие display */
+}
+
+.app-container.fade-in {
+    display: flex;
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}

@@ -12,7 +12,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const profitValue = document.getElementById('profit-value');
     const levelName = document.getElementById('level-name');
     const levelProgressText = document.getElementById('level-progress-text');
+    const loaderScreen = document.getElementById('loader-screen');
+    const appContainer = document.getElementById('app-container');
 
+    
     // --- ИГРОВЫЕ ПЕРЕМЕННЫЕ ---
     let score = 0;
     let energy = 0;
@@ -160,7 +163,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             console.error("Error loading state:", error);
         } finally {
-            isLoading = false; // Отключаем блокировку в любом случае
+            isLoading = false; 
+            
+            // --- ПЕРЕКЛЮЧАЕМ ЭКРАНЫ ---
+            // Убираем загрузочный экран
+            loaderScreen.style.opacity = '0';
+            setTimeout(() => {
+                loaderScreen.classList.add('hidden');
+            }, 500); // 500ms - время, равное transition в CSS
+
+            // Показываем игровой интерфейс
+            appContainer.classList.remove('hidden');
+            appContainer.classList.add('fade-in');
         }
     }
 
