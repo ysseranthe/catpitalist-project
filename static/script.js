@@ -1,221 +1,179 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    // --- 1. СНАЧАЛА НАХОДИМ ВСЕ ЭЛЕМЕНТЫ ---
-    const scoreElement = document.getElementById('score');
-    const catElement = document.getElementById('cat');
-    const clickArea = document.getElementById('click-area');
-    const energyLevelElement = document.getElementById('energy-level');
-    const progressBarElement = document.getElementById('progress-bar-foreground');
-    const usernameDisplayElement = document.getElementById('username-display');
-    const tabButtons = document.querySelectorAll('.tab-button');
-    const tapEarnValue = document.getElementById('tap-earn-value');
-    const levelUpCost = document.getElementById('level-up-cost');
-    const profitValue = document.getElementById('profit-value');
-    const levelName = document.getElementById('level-name');
-    const levelProgressText = document.getElementById('level-progress-text');
-    const loaderScreen = document.getElementById('loader-screen');
-    const appContainer = document.getElementById('app-container');
+    // --- 1. ЕДИНЫЙ ОБЪЕКТ СОСТОЯНИЯ ИГРЫ ---
+    // Все изменяемые переменные хранятся здесь.
+    // Этот объект создается заново при каждой загрузке скрипта,
+    // что гарантирует сброс всех значений.
+    const gameState = {
+        score: 0,
+        energy: 0,
+        userId: null,
+        isLoading: true,
+        level: 1,
+        profitPerHour: 0,
+        energyPerSecond: 0,
+        tapValue: 1
+    };
 
-    // --- 2. ОБЪЯВЛЯЕМ КОНСТАНТЫ И ПЕРЕМЕННЫЕ ---
-    let score, energy, userId, isLoading, level, profitPerHour, energyPerSecond, tapValue;
+    // --- 2. ПОИСК ВСЕХ ЭЛЕМЕНТОВ ИНТЕРФЕЙСА ---
+    const elements = {
+        score: document.getElementById('score'),
+        cat: document.getElementById('cat'),
+        clickArea: document.getElementById('click-area'),
+        energyLevel: document.getElementById('energy-level'),
+        progressBar: document.getElementById('progress-bar-foreground'),
+        usernameDisplay: document.getElementById('username-display'),
+        tabButtons: document.querySelectorAll('.tab-button'),
+        tapEarnValue: document.getElementById('tap-earn-value'),
+        levelUpCost: document.getElementById('level-up-cost'),
+        profitValue: document.getElementById('profit-value'),
+        levelName: document.getElementById('level-name'),
+        levelProgressText: document.getElementById('level-progress-text'),
+        loaderScreen: document.getElementById('loader-screen'),
+        appContainer: document.getElementById('app-container')
+    };
+
+    // --- 3. ИГРОВЫЕ КОНСТАНТЫ И СПРАВОЧНИКИ ---
+    // Эти данные не меняются в ходе игры.
+    const config = {
+        maxEnergy: 100,
+        levelNames: ["", "Homeless", "Street Cat", "Hustler", "Mouser", "Junior Entrepreneur", "Businessman", "Manager", "Tycoon", "Magnate", "Chairman", "Catpitalist", "The Marquess", "King of the Pride", "The Legend", "The Cat-peror"],
+        scoreToNextLevel: [0, 500, 1500, 4000, 12000, 40000, 150000, 500000, 2000000, 10000000, 50000000, 250000000, 1500000000, 10000000000, 100000000000, 1000000000000],
+        tapValueLevels: [0, 1, 2, 3, 5, 8, 12, 20, 35, 60, 100, 1000, 5000, 25000, 100000, 500000],
+        profitPerHourLevels: [0, 0, 50, 200, 750, 2500, 10000, 40000, 150000, 600000, 2500000, 12000000, 60000000, 300000000, 2000000000, 15000000000],
+        catImageLevels: ["", "CAT0.png", "CAT2.png", "CAT3.png", "CAT4.png", "CAT5.png", "CAT6.png", "CAT7.png"] // Добавьте сюда все 15 имен файлов
+    };
+
+    // --- 4. ОСНОВНЫЕ ИГРОВЫЕ ФУНКЦИИ ---
+
+    const updateDisplay = () => {
+        elements.score.innerText = Math.floor(gameState.score).toLocaleString('en-US');
+        elements.energyLevel.innerText = `${Math.floor(gameState.energy)}/${config.maxEnergy}`;
+
+        if (!gameState.isLoading) {
+            gameState.tapValue = config.tapValueLevels[gameState.level] || config.tapValueLevels.at(-1);
+            gameState.profitPerHour = config.profitPerHourLevels[gameState.level] || config.profitPerHourLevels.at(-1);
+            
+            const requiredScore = config.scoreToNextLevel[gameState.level] || Infinity;
+            const levelProgressPercentage = requiredScore > 0 ? (gameState.score / requiredScore) * 100 : 0;
+            
+            elements.progressBar.style.width = `${Math.min(100, levelProgressPercentage)}%`;
+            elements.tapEarnValue.innerText = `+${gameState.tapValue}`;
+            elements.levelUpCost.innerText = formatScore(requiredScore);
+            elements.profitValue.innerText = `+${formatScore(Math.floor(gameState.profitPerHour))}`;
+            elements.levelName.innerText = `${config.levelNames[gameState.level]} >`;
+            elements.levelProgressText.innerText = `${gameState.level}/15`;
+
+            const catImage = config.catImageLevels[gameState.level] || config.catImageLevels.at(-1);
+            if(catImage) elements.cat.style.backgroundImage = `url('/static/images/${catImage}')`;
+        }
+    };
+
+    const checkLevelUp = () => {
+        if (gameState.level >= config.scoreToNextLevel.length - 1) return;
+        if (gameState.score >= config.scoreToNextLevel[gameState.level]) {
+            gameState.level++;
+        }
+    };
+
+    const visualTick = () => {
+        if (gameState.isLoading) return;
+        
+        const profitPerTick = gameState.profitPerHour / 3600;
+        gameState.score += profitPerTick;
+
+        if (gameState.energy < config.maxEnergy) {
+            gameState.energy = Math.min(config.maxEnergy, gameState.energy + gameState.energyPerSecond);
+        }
+        
+        checkLevelUp();
+        updateDisplay();
+    };
+
+    const saveStateToServer = () => {
+        if (!gameState.userId) return;
+        fetch('/api/save_score', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                user_id: gameState.userId,
+                score: Math.floor(gameState.score),
+                energy: Math.floor(gameState.energy),
+                level: gameState.level
+            }),
+        });
+    };
     
-    const maxEnergy = 100;
-    const levelNames = ["", "Homeless", "Street Cat", "Hustler", "Mouser", "Junior Entrepreneur", "Businessman", "Manager", "Tycoon", "Magnate", "Chairman", "Catpitalist", "The Marquess", "King of the Pride", "The Legend", "The Cat-peror"];
-    const scoreToNextLevel = [0, 500, 1500, 4000, 12000, 40000, 150000, 500000, 2000000, 10000000, 50000000, 250000000, 1500000000, 10000000000, 100000000000, 1000000000000];
-    const tapValueLevels = [0, 1, 2, 3, 5, 8, 12, 20, 35, 60, 100, 1000, 5000, 25000, 100000, 500000];
-    const profitPerHourLevels = [0, 0, 50, 200, 750, 2500, 10000, 40000, 150000, 600000, 2500000, 12000000, 60000000, 300000000, 2000000000, 15000000000];
-    const catImageLevels = ["", "CAT0.png", "CAT2.png", "CAT3.png", "CAT4.png", "CAT5.png", "CAT6.png", "CAT7.png"];
+    const loadStateFromServer = async () => {
+        if (!gameState.userId) { gameState.isLoading = false; return; }
+        gameState.isLoading = true;
+        try {
+            const response = await fetch(`/api/get_score/${gameState.userId}`);
+            const data = await response.json();
+            if (response.ok) {
+                gameState.score = data.score;
+                gameState.energy = data.energy;
+                gameState.level = data.level;
+                gameState.profitPerHour = data.profit_per_hour;
+                gameState.energyPerSecond = data.energy_per_second;
+            }
+        } catch (error) { console.error("Error loading state:", error); }
+        finally {
+            gameState.isLoading = false;
+            updateDisplay();
+            elements.loaderScreen.style.opacity = '0';
+            setTimeout(() => { elements.loaderScreen.classList.add('hidden'); }, 500);
+            elements.appContainer.classList.remove('hidden');
+            elements.appContainer.classList.add('fade-in');
+        }
+    };
 
-    // --- 3. ФУНКЦИЯ ДЛЯ СБРОСА ПЕРЕМЕННЫХ ---
-    function initializeVariables() {
-        score = 0;
-        energy = 0;
-        userId = null;
-        isLoading = true;
-        level = 1;
-        profitPerHour = 0;
-        energyPerSecond = 0;
-        tapValue = 1;
-    }
+    const initUser = async (tg) => {
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            const user = tg.initDataUnsafe.user;
+            gameState.userId = user.id;
+            elements.usernameDisplay.innerText = user.username || `${user.first_name} ${user.last_name || ''}`.trim();
+            await loadStateFromServer();
+        } else {
+            elements.usernameDisplay.innerText = "Error";
+            elements.clickArea.style.pointerEvents = 'none';
+            gameState.isLoading = false;
+        }
+    };
+    
+    const formatScore = (num) => {
+        if (num < 1000) return num.toString();
+        if (num < 1_000_000) return (num / 1000).toFixed(1).replace('.0', '') + 'K';
+        if (num < 1_000_000_000) return (num / 1_000_000).toFixed(1).replace('.0', '') + 'M';
+        if (num < 1_000_000_000_000) return (num / 1_000_000_000).toFixed(1).replace('.0', '') + 'B';
+        return (num / 1_000_000_000_000).toFixed(1).replace('.0', '') + 'T';
+    };
 
-    // --- 4. ЗАПУСКАЕМ ИНИЦИАЛИЗАЦИЮ ---
-    initializeVariables(); // Теперь вызов идет ПОСЛЕ объявления
+    // --- 5. ЗАПУСК ИГРЫ ---
     const tg = window.Telegram.WebApp;
     tg.ready();
     tg.expand();
-    
-    setupEventListeners();
-    await setupUserAndLoadData(tg);
 
-    setInterval(visualTick, 1000);
-
-    // --- ФУНКЦИИ ---
-
-    async function setupUserAndLoadData(tg) {
-        // Закомментировано для продакшена. Раскомментируйте для локального теста.
-        /*
-        if (true) { 
-            userId = 12345678;
-            usernameDisplayElement.innerText = "Local Test";
-            await loadStateFromServer(); // ЖДЕМ загрузки данных
-            return;
-        }
-        */
-
-        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            const user = tg.initDataUnsafe.user;
-            userId = user.id;
-            usernameDisplayElement.innerText = user.username || `${user.first_name} ${user.last_name || ''}`.trim();
-            await loadStateFromServer(); // ЖДЕМ загрузки данных
-        } else {
-            usernameDisplayElement.innerText = "Error";
-            clickArea.style.pointerEvents = 'none';
-            isLoading = false; // Снимаем блокировку, если Telegram API недоступен
-        }
-    }
-
-    function setupEventListeners() {
-        clickArea.addEventListener('pointerdown', () => {
-            // Проверяем, не идет ли загрузка и достаточно ли энергии
-            if (isLoading || Math.floor(energy) < tapValue) {
-                return;
-            }
-
-            energy -= tapValue;
-            score += tapValue;
-            
-            checkLevelUp();
-            animateCat();
-            updateDisplay();
-            saveStateToServer();
-        });
-
-        clickArea.addEventListener('pointerup', () => catElement.style.transform = 'scale(1)');
-        clickArea.addEventListener('pointerleave', () => catElement.style.transform = 'scale(1)');
-
-        tabButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                tabButtons.forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
-            });
-        });
-    }
-
-    function visualTick() {
-        if (isLoading) return; // Не обновляем ничего, пока данные не загружены
+    elements.clickArea.addEventListener('pointerdown', () => {
+        if (gameState.isLoading || Math.floor(gameState.energy) < gameState.tapValue) return;
         
-        score += profitPerHour / 3600;
-
-
-        if (energy < maxEnergy) {
-            energy = Math.min(maxEnergy, energy + energyPerSecond);
-        }
-
+        gameState.energy -= gameState.tapValue;
+        gameState.score += gameState.tapValue;
+        
         checkLevelUp();
+        elements.cat.style.transform = 'scale(0.9)';
         updateDisplay();
-    }
+        saveStateToServer();
+    });
+    elements.clickArea.addEventListener('pointerup', () => elements.cat.style.transform = 'scale(1)');
+    elements.clickArea.addEventListener('pointerleave', () => elements.cat.style.transform = 'scale(1)');
     
-    function updateDisplay() {
-        // Эти два значения можно обновлять всегда, даже во время загрузки
-        scoreElement.innerText = Math.floor(score).toLocaleString('en-US');
-        energyLevelElement.innerText = `${Math.floor(energy)}/${maxEnergy}`;
+    elements.tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            elements.tabButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+        });
+    });
 
-        // Всю остальную логику, связанную с уровнями, выполняем
-        // только после того, как данные с сервера загружены
-        if (!isLoading) {
-            tapValue = tapValueLevels[level] || tapValueLevels[tapValueLevels.length - 1];
-            const requiredScore = scoreToNextLevel[level] || scoreToNextLevel[scoreToNextLevel.length - 1];
-            profitPerHour = profitPerHourLevels[level] || profitPerHourLevels[profitPerHourLevels.length - 1];
-            // --- ПРОСТАЯ ЛОГИКА ПРОГРЕСС-БАРА, ЗАВИСЯЩАЯ ОТ БАЛАНСА ---
-            const levelProgressPercentage = requiredScore > 0 ? (score / requiredScore) * 100 : 0;
-            progressBarElement.style.width = `${Math.min(100, levelProgressPercentage)}%`;
-            // --- КОНЕЦ НОВОЙ ЛОГИКИ ---
-
-            // Обновление остального интерфейса
-            tapEarnValue.innerText = `+${tapValue}`;
-            levelUpCost.innerText = formatScore(requiredScore);
-            profitValue.innerText = `+${formatScore(Math.floor(profitPerHour))}`;
-            levelName.innerText = `${levelNames[level]} >`;
-            levelProgressText.innerText = `${level}/15`;
-
-            const catImage = catImageLevels[level] || catImageLevels[catImageLevels.length - 1];
-            if(catImage) catElement.style.backgroundImage = `url('/static/images/${catImage}')`;
-        }
-    }
-    
-    function animateCat() {
-        catElement.style.transform = 'scale(0.9)';
-    }
-
-    async function loadStateFromServer() {
-        if (!userId) {
-            isLoading = false;
-            return;
-        }
-        isLoading = true; // Включаем блокировку перед запросом
-        try {
-            const response = await fetch(`/api/get_score/${userId}`);
-            const data = await response.json();
-            if (response.ok) {
-                // Принудительно преобразуем в числа, чтобы избежать ошибок типов
-                score = Number(data.score) || 0;
-                energy = Number(data.energy) || 0;
-                level = Number(data.level) || 1;
-                profitPerHour = Number(data.profit_per_hour) || 0;
-                energyPerSecond = Number(data.energy_per_second) || 0;
-            }
-        } catch (error) {
-            console.error("Error loading state:", error);
-        } finally {
-            isLoading = false; 
-
-            // --- ПРАВИЛЬНЫЙ ПОРЯДОК ПЕРЕКЛЮЧЕНИЯ ЭКРАНОВ ---
-            
-            // 1. СНАЧАЛА обновляем все данные "в памяти"
-            updateDisplay(); 
-            
-            // 2. ПОТОМ плавно убираем загрузочный экран
-            loaderScreen.style.opacity = '0';
-            setTimeout(() => {
-                loaderScreen.classList.add('hidden');
-            }, 500);
-
-            // 3. И ОДНОВРЕМЕННО плавно показываем уже полностью готовый интерфейс
-            appContainer.classList.remove('hidden');
-            appContainer.classList.add('fade-in');
-        }
-    }
-
-    async function saveStateToServer() {
-        if (!userId) return;
-        console.log(`>>> SAVING TO SERVER: score=${Math.floor(score)}, energy=${Math.floor(energy)}, level=${level}`);
-        try {
-            fetch('/api/save_score', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    user_id: userId,
-                    score: Math.floor(score),
-                    energy: Math.floor(energy),
-                    level: level
-                }),
-            });
-        } catch (error) {
-            console.error("Error saving state:", error);
-        }
-    }
-
-    function checkLevelUp() {
-        if (level >= scoreToNextLevel.length - 1) return;
-        if (score >= scoreToNextLevel[level]) {
-            level++;
-        }
-    }
-
-    function formatScore(num) {
-        if (num < 1000) return num.toString();
-        if (num < 1000000) return (num / 1000).toFixed(1).replace('.0', '') + 'K';
-        if (num < 1000000000) return (num / 1000000).toFixed(1).replace('.0', '') + 'M';
-        if (num < 1000000000000) return (num / 1000000000).toFixed(1).replace('.0', '') + 'B';
-        return (num / 1000000000000).toFixed(1).replace('.0', '') + 'T';
-    }
+    await initUser(tg);
+    setInterval(visualTick, 1000);
 });
