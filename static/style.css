@@ -131,6 +131,7 @@ body {
 }
 
 /* --- Кот --- */
+/* --- Кот (финальная версия с radial-gradient) --- */
 .cat-container {
     flex-grow: 1;
     display: flex;
@@ -138,21 +139,30 @@ body {
     justify-content: center;
     width: 100%;
     position: relative;
-    min-height: 150px; /* Минимальная высота, чтобы кот не исчезал на маленьких экранах */
+    min-height: 150px;
+
+    /* --- ГЛАВНОЕ ИЗМЕНЕНИЕ: ФОН-СВЕЧЕНИЕ --- */
+    background: radial-gradient(
+        circle,
+        rgba(105, 155, 255, 0.25) 0%, /* Цвет в центре */
+        rgba(105, 155, 255, 0) 50%  /* Прозрачный цвет на 50% радиуса */
+    );
 }
+
 .cat-character {
     width: 80%;
     max-width: 300px;
     aspect-ratio: 1 / 1;
-    background-image: url('/static/images/CAT0.png'); /* СТАРТОВЫЙ КОТ */
+    background-image: url('/static/images/CAT0.png');
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
+    
+    /* Анимация по-прежнему применяется только к коту */
     transform: scale(1);
     transition: transform 0.1s ease-out;
-    filter: drop-shadow(0 0 100px rgba(255, 255, 255, 0.7));
-
 }
+
 #click-area {
     position: absolute;
     top: 0;
