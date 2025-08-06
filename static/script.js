@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     // --- ЭЛЕМЕНТЫ ИНТЕРФЕЙСА ---
     const scoreElement = document.getElementById('score');
-    const catImageElement = document.querySelector('.cat-image');
+    const catElement = document.getElementById('cat');
     const clickArea = document.getElementById('click-area');
     const energyLevelElement = document.getElementById('energy-level');
     const progressBarElement = document.getElementById('progress-bar-foreground');
@@ -80,8 +80,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             saveStateToServer();
         });
 
-        clickArea.addEventListener('pointerup', () => catImageElement.style.transform = 'scale(1)');
-        clickArea.addEventListener('pointerleave', () => catImageElement.style.transform = 'scale(1)');
+        clickArea.addEventListener('pointerup', () => {
+            catElement.style.backgroundSize = 'contain, calc(100% + 10px)';
+        });
+        clickArea.addEventListener('pointerleave', () => {
+            catElement.style.backgroundSize = 'contain, calc(100% + 10px)';
+        });
 
         tabButtons.forEach(button => {
             button.addEventListener('click', () => {
@@ -129,12 +133,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             levelProgressText.innerText = `${level}/15`;
 
             const catImage = catImageLevels[level] || catImageLevels[catImageLevels.length - 1];
-            if(catImage) catImageElement.style.backgroundImage = `url('/static/images/${catImage}')`;
+            if(catImage) {
+                catElement.style.backgroundImage = `url('/static/images/${catImage}'), url('/static/images/${catImage}')`;
+            }
         }
     }
     
     function animateCat() {
-        catImageElement.style.transform = 'scale(0.9)';
+        catElement.style.backgroundSize = '85%, calc(100% + 10px)';
     }
 
     async function loadStateFromServer() {
