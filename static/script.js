@@ -114,20 +114,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     function updateDisplay() {
-        // Эти значения можно обновлять всегда
+        // Эти два значения можно обновлять всегда, даже во время загрузки
         scoreElement.innerText = Math.floor(score).toLocaleString('en-US');
         energyLevelElement.innerText = `${Math.floor(energy)}/${maxEnergy}`;
 
-        // А вот эту часть выполняем, только если загрузка завершена
+        // Всю остальную логику, связанную с уровнями, выполняем
+        // только после того, как данные с сервера загружены
         if (!isLoading) {
             tapValue = tapValueLevels[level] || tapValueLevels[tapValueLevels.length - 1];
             const requiredScore = scoreToNextLevel[level] || scoreToNextLevel[scoreToNextLevel.length - 1];
-            const prevLevelScore = scoreToNextLevel[level - 1] || 0;
-            const progressForCurrentLevel = score - prevLevelScore;
-            const totalProgressNeeded = requiredScore - prevLevelScore;
-            let levelProgressPercentage = totalProgressNeeded > 0 ? (progressForCurrentLevel / totalProgressNeeded) * 100 : 0;
             
-            progressBarElement.style.width = `${Math.max(0, Math.min(100, levelProgressPercentage))}%`;
+            // --- ПРОСТАЯ ЛОГИКА ПРОГРЕСС-БАРА, ЗАВИСЯЩАЯ ОТ БАЛАНСА ---
+            const levelProgressPercentage = requiredScore > 0 ? (score / requiredScore) * 100 : 0;
+            progressBarElement.style.width = `${Math.min(100, levelProgressPercentage)}%`;
+            // --- КОНЕЦ НОВОЙ ЛОГИКИ ---
+
+            // Обновление остального интерфейса
             tapEarnValue.innerText = `+${tapValue}`;
             levelUpCost.innerText = formatScore(requiredScore);
             profitValue.innerText = `+${formatScore(Math.floor(profitPerHour))}`;
@@ -164,15 +166,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error("Error loading state:", error);
         } finally {
             isLoading = false; 
+
+            // --- ПРАВИЛЬНЫЙ ПОРЯДОК ПЕРЕКЛЮЧЕНИЯ ЭКРАНОВ ---
             
-            // --- ПЕРЕКЛЮЧАЕМ ЭКРАНЫ ---
-            // Убираем загрузочный экран
+            // 1. СНАЧАЛА обновляем все данные "в памяти"
+            updateDisplay(); 
+            
+            // 2. ПОТОМ плавно убираем загрузочный экран
             loaderScreen.style.opacity = '0';
             setTimeout(() => {
                 loaderScreen.classList.add('hidden');
-            }, 500); // 500ms - время, равное transition в CSS
+            }, 500);
 
-            // Показываем игровой интерфейс
+            // 3. И ОДНОВРЕМЕННО плавно показываем уже полностью готовый интерфейс
             appContainer.classList.remove('hidden');
             appContainer.classList.add('fade-in');
         }
