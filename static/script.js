@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
+    initializeVariables();
     // --- ЭЛЕМЕНТЫ ИНТЕРФЕЙСА ---
     const scoreElement = document.getElementById('score');
     const catElement = document.getElementById('cat');
@@ -17,13 +18,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     
     // --- ИГРОВЫЕ ПЕРЕМЕННЫЕ ---
-      let score = 0;
-    let energy = 0;
-    let userId = null;
-    let isLoading = true;
-    let level = 1;
-    let profitPerHour = 0;
-    let energyPerSecond = 0;
+    let score, energy, userId, isLoading, level, profitPerHour, energyPerSecond;
+
+    function initializeVariables() {
+        console.log("--- Initializing all game variables to default ---");
+        score = 0;
+        energy = 0;
+        userId = null;
+        isLoading = true;
+        level = 1;
+        profitPerHour = 0;
+        energyPerSecond = 0;
+    }
+
     const maxEnergy = 100;
     const scoreToNextLevel = [0, 500, 1500, 4000, 12000, 40000, 150000, 500000, 2000000, 10000000, 50000000, 250000000, 1500000000, 10000000000, 100000000000, 1000000000000];
     let tapValue = 1;
