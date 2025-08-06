@@ -77,15 +77,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const visualTick = () => {
         if (gameState.isLoading) return;
-        
-        const profitPerTick = gameState.profitPerHour / 3600;
-        gameState.score += profitPerTick;
 
+        // Отвечает ТОЛЬКО за регенерацию энергии
         if (gameState.energy < config.maxEnergy) {
             gameState.energy = Math.min(config.maxEnergy, gameState.energy + gameState.energyPerSecond);
         }
         
-        checkLevelUp();
+        // Обновляем только дисплей, не меняя счет
         updateDisplay();
     };
 
