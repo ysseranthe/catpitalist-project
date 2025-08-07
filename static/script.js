@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         scoreToNextLevel: [0, 500, 1500, 4000, 12000, 40000, 150000, 500000, 2000000, 10000000, 50000000, 250000000, 1500000000, 10000000000, 100000000000, 1000000000000],
         tapValueLevels: [0, 1, 2, 3, 5, 8, 12, 20, 35, 60, 100, 1000, 5000, 25000, 100000, 500000],
         profitPerHourLevels: [0, 0, 50, 200, 750, 2500, 10000, 40000, 150000, 600000, 2500000, 12000000, 60000000, 300000000, 2000000000, 15000000000],
-        catImageLevels: ["", "CAT0.png", "CAT2.png", "CAT3.png", "CAT4.png", "CAT5.png", "CAT6.png", "CAT7.png"] // Добавьте сюда все 15 имен файлов
+        catImageLevels: ["", "CAT1.png", "CAT2.png", "CAT3.png", "CAT4.png", "CAT5.png", "CAT6.png", "CAT7.png", "CAT8.png", "CAT9.png", "CAT10.png", "CAT11.png", "CAT12.png", "CAT13.png", "CAT14.png", "CAT15.png"] // Добавьте сюда все 15 имен файлов
     };
 
     // --- 4. ОСНОВНЫЕ ИГРОВЫЕ ФУНКЦИИ ---
