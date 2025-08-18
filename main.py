@@ -79,7 +79,7 @@ async def get_score(user_id: int):
         }
 
     # --- ЛОГИКА ДЛЯ СУЩЕСТВУЮЩЕГО ПОЛЬЗОВАТЕЛЯ ---
-    print(f"--- 3. User FOUND. Starting offline calculations. ---")
+    print(f"--- 3. User FOUND. Initial state from DB: score={user['score']}, energy={user['energy']}, level={user['level']} ---") # <<< ДОБАВЛЕН ЭТОТ ЛОГ
     
     current_level = user['level']
     profit_per_hour_base = profit_per_hour_levels[current_level] if current_level < len(profit_per_hour_levels) else profit_per_hour_levels[-1]
