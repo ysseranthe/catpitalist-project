@@ -71,14 +71,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
-    const checkLevelUp = () => {
-        if (gameState.level >= config.scoreToNextLevel.length - 1) return;
-        
-        if (gameState.score >= config.scoreToNextLevel[gameState.level]) {
+const checkLevelUp = () => {
+        let levelIncreased = false;
+        while (
+            gameState.level < config.scoreToNextLevel.length - 1 &&
+            gameState.score >= config.scoreToNextLevel[gameState.level]
+        ) {
             gameState.level++;
-            // ОБНОВЛЯЕМ ПАРАМЕТРЫ ПРИ ПОВЫШЕНИИ УРОВНЯ
-            gameState.profitPerHour = config.profitPerHourLevels[gameState.level] || config.profitPerHourLevels.at(-1);
+            levelIncreased = true;
         }
+        return levelIncreased;
     };
 
     const visualTick = () => {
@@ -126,7 +128,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 gameState.profitPerHour = data.profit_per_hour;
                 gameState.energyPerSecond = data.energy_per_second;
 
-                checkLevelUp();
+                const didLevelUp = checkLevelUp();
+                
+                if (didLevelUp) {
+                    console.log(`Level up from offline progress! New level: ${gameState.level}. Saving state immediately.`);
+                    saveStateToServer();
+                }
             }
         } catch (error) { console.error("Error loading state:", error); }
         finally {
