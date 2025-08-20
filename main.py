@@ -16,7 +16,7 @@ users = sqlalchemy.Table(
     "users",
     metadata,
     sqlalchemy.Column("user_id", sqlalchemy.BigInteger, primary_key=True),
-    sqlalchemy.Column("score", sqlalchemy.Integer, default=0),
+    sqlalchemy.Column("score", sqlalchemy.BigInteger, default=0),
     sqlalchemy.Column("energy", sqlalchemy.Integer, default=100),
     sqlalchemy.Column("level", sqlalchemy.Integer, default=1),
     sqlalchemy.Column("last_seen", sqlalchemy.DateTime, default=datetime.datetime.utcnow)
