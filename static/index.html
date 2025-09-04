@@ -91,7 +91,6 @@
 
         </main>
 
-        <!-- Нижнее меню (Tab Bar) -->
         <footer class="tab-bar">
             <button class="tab-button">
                 <img src="/static/images/productivity.png" alt="Upgrades">
@@ -101,7 +100,7 @@
                 <img src="/static/images/briefcase.png" alt="Empire">
                 <span>Empire</span>
             </button>
-            <button class="tab-button active"> <!-- Активная вкладка - главная -->
+            <button class="tab-button active">
                 <img src="/static/images/social.png" alt="Tap">
                 <span>Tap</span>
             </button>
@@ -115,6 +114,30 @@
             </button>
         </footer>
 
+        <div id="level-modal-overlay" class="modal-overlay hidden">
+            <div id="level-modal-content" class="modal-content">
+                
+                <div class="modal-header">
+                    <h2>Your Level Progression</h2>
+                    <button id="level-modal-close-btn" class="modal-close-btn">&times;</button>
+                </div>
+
+                <div class="current-level-hero">
+                    <div class="hero-text-block">
+                        <span>Level</span>
+                        <strong id="hero-level-number">0</strong>
+                    </div>
+                    <img id="hero-cat-avatar" src="/static/images/CAT0.png" alt="Current Cat" class="hero-cat-avatar">
+                    <div class="hero-text-block hero-text-block-right">
+                        <span id="hero-level-name">Noob</span>
+                    </div>
+                </div>
+
+                <div id="level-progression-list" class="level-progression-list">
+                </div>
+
+            </div>
+        </div>
     </div>
 
     <script src="/static/script.js?v=1.3" defer></script>
