@@ -29,7 +29,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         levelName: document.getElementById('level-name'),
         levelProgressText: document.getElementById('level-progress-text'),
         loaderScreen: document.getElementById('loader-screen'),
-        appContainer: document.getElementById('app-container')
+        appContainer: document.getElementById('app-container'),
+
+        levelInfoTrigger: document.querySelector('.level-info'),
+        
+        levelModalOverlay: document.getElementById('level-modal-overlay'),
+        levelModalCloseBtn: document.getElementById('level-modal-close-btn'),
+        heroLevelNumber: document.getElementById('hero-level-number'),
+        heroLevelName: document.getElementById('hero-level-name'),
+        heroCatAvatar: document.getElementById('hero-cat-avatar'),
+        levelProgressionList: document.getElementById('level-progression-list')
     };
 
     // --- 3. ИГРОВЫЕ КОНСТАНТЫ И СПРАВОЧНИКИ ---
@@ -167,6 +176,53 @@ const checkLevelUp = () => {
         return (num / 1_000_000_000_000).toFixed(1).replace('.0', '') + 'T';
     };
 
+    // --- ФУНКЦИИ ДЛЯ УПРАВЛЕНИЯ МОДАЛЬНЫМ ОКНОМ УРОВНЕЙ ---
+    const openLevelModal = () => {
+        // 1. Заполняем "шапку" окна текущими данными
+        elements.heroLevelNumber.innerText = gameState.level;
+        elements.heroLevelName.innerText = config.levelNames[gameState.level];
+        elements.heroCatAvatar.src = `/static/images/${config.catImageLevels[gameState.level]}`;
+
+        // 2. Очищаем старый список
+        elements.levelProgressionList.innerHTML = '';
+
+        // 3. Генерируем и выводим новый список всех уровней
+        config.levelNames.forEach((name, index) => {
+            if (index === 0) return; // Пропускаем технический "нулевой" уровень
+
+            const levelItem = document.createElement('div');
+            levelItem.classList.add('level-item');
+
+            // Определяем состояние уровня (пройден, текущий, будущий) и добавляем классы
+            if (index < gameState.level) levelItem.classList.add('is-past');
+            if (index === gameState.level) levelItem.classList.add('is-current');
+            if (index > gameState.level) levelItem.classList.add('is-future');
+
+            const requiredScore = config.scoreToNextLevel[index];
+
+            levelItem.innerHTML = `
+                <img src="/static/images/${config.catImageLevels[index]}" class="level-cat-avatar">
+                <span class="level-item-name">${name}</span>
+                <div class="level-item-info">
+                    <span>Level</span>
+                    <strong>${index}</strong>
+                </div>
+                <div class="level-item-info">
+                    <span>Requires</span>
+                    <strong>${formatScore(requiredScore)}</strong>
+                </div>
+            `;
+            elements.levelProgressionList.appendChild(levelItem);
+        });
+
+        // 4. Показываем модальное окно
+        elements.levelModalOverlay.classList.remove('hidden');
+    };
+
+    const closeLevelModal = () => {
+        elements.levelModalOverlay.classList.add('hidden');
+    };
+
     // --- 5. ЗАПУСК ИГРЫ ---
     const tg = window.Telegram.WebApp;
     tg.ready();
@@ -195,4 +251,12 @@ const checkLevelUp = () => {
 
     await initUser(tg);
     setInterval(visualTick, 1000);
+    elements.levelInfoTrigger.addEventListener('click', openLevelModal);
+    elements.levelModalCloseBtn.addEventListener('click', closeLevelModal);
+    elements.levelModalOverlay.addEventListener('click', (event) => {
+        // Закрываем окно при клике на темный фон
+        if (event.target === elements.levelModalOverlay) {
+            closeLevelModal();
+        }
+    });
 });
