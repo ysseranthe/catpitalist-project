@@ -181,7 +181,7 @@ const checkLevelUp = () => {
         // 1. Заполняем "шапку" окна текущими данными
         elements.heroLevelNumber.innerText = gameState.level;
         elements.heroLevelName.innerText = config.levelNames[gameState.level];
-        elements.heroCatAvatar.src = `/static/images/${config.catImageLevels[gameState.level]}`;
+        elements.heroCatAvatar.style.backgroundImage = `url('/static/images/${config.catImageLevels[gameState.level]}')`;
 
         // 2. Очищаем старый список
         elements.levelProgressionList.innerHTML = '';
@@ -198,10 +198,10 @@ const checkLevelUp = () => {
             if (index === gameState.level) levelItem.classList.add('is-current');
             if (index > gameState.level) levelItem.classList.add('is-future');
 
-            const requiredScore = config.scoreToNextLevel[index];
+            const requiredScore = config.scoreToNextLevel[index-1];
 
             levelItem.innerHTML = `
-                <img src="/static/images/${config.catImageLevels[index]}" class="level-cat-avatar">
+                <div class="level-cat-avatar" style="background-image: url('/static/images/${config.catImageLevels[index]}')"></div>
                 <span class="level-item-name">${name}</span>
                 <div class="level-item-info">
                     <span>Level</span>
