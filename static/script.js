@@ -87,6 +87,10 @@ const checkLevelUp = () => {
             gameState.score >= config.scoreToNextLevel[gameState.level]
         ) {
             gameState.level++;
+
+            gameState.profitPerHour = config.profitPerHourLevels[gameState.level];
+            gameState.energyPerSecond = config.energyPerSecondLevels[gameState.level];
+
             levelIncreased = true;
         }
         return levelIncreased;
