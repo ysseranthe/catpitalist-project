@@ -15,7 +15,12 @@
 </head>
 <body>
 
-    <div class="app-container">
+    <div id="loader-screen" class="loader-screen">
+        <div class="spinner"></div>
+        <h1>Catpitalist</h1>
+    </div>
+
+    <div id="app-container" class="app-container hidden">
 
         <!-- Верхний бар с информацией о пользователе -->
         <header class="top-bar">
@@ -64,7 +69,7 @@
             <!-- Прогресс-бар уровня -->
             <section class="level-progress">
                 <div class="level-info">
-                    <span id=level-name">Homeless ></span>
+                    <span id="level-name">Homeless ></span>
                     <span id="level-progress-text">1/15</span>
                 </div>
                 <div class="progress-bar-background">
@@ -86,7 +91,6 @@
 
         </main>
 
-        <!-- Нижнее меню (Tab Bar) -->
         <footer class="tab-bar">
             <button class="tab-button">
                 <img src="/static/images/productivity.png" alt="Upgrades">
@@ -96,7 +100,7 @@
                 <img src="/static/images/briefcase.png" alt="Empire">
                 <span>Empire</span>
             </button>
-            <button class="tab-button active"> <!-- Активная вкладка - главная -->
+            <button class="tab-button active">
                 <img src="/static/images/social.png" alt="Tap">
                 <span>Tap</span>
             </button>
@@ -110,8 +114,32 @@
             </button>
         </footer>
 
+        <div id="level-modal-overlay" class="modal-overlay hidden">
+            <div id="level-modal-content" class="modal-content">
+                
+                <div class="modal-header">
+                    <h2>Your Level Progression</h2>
+                    <button id="level-modal-close-btn" class="modal-close-btn">&times;</button>
+                </div>
+
+                <div class="current-level-hero">
+                    <div class="hero-text-block">
+                        <span>Level</span>
+                        <strong id="hero-level-number">0</strong>
+                    </div>
+                    <div id="hero-cat-avatar" class="hero-cat-avatar"></div>
+                    <div class="hero-text-block hero-text-block-right">
+                        <span id="hero-level-name">Noob</span>
+                    </div>
+                </div>
+
+                <div id="level-progression-list" class="level-progression-list">
+                </div>
+
+            </div>
+        </div>
     </div>
 
-    <script src="/static/script.js?v=1.15" defer></script>
+    <script src="/static/script.js?v=1.301" defer></script>
 </body>
 </html>
