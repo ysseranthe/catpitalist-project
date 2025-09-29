@@ -12,6 +12,49 @@ DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./test.db")
 database = Database(DATABASE_URL)
 metadata = sqlalchemy.MetaData()
 
+# 'type': tap, passive, energy
+# 'value': для tap - сколько добавляет к силе тапа, 
+#          для passive - сколько добавляет к доходу в час,
+#          для energy - сколько добавляет к максимальному запасу энергии.
+UPGRADES_CATALOG = {
+    "tap_1": {
+        "id": "tap_1",
+        "name": "Sharp Claws",
+        "type": "tap",
+        "description": "Increases the amount of CatPoints earned per tap.",
+        "levels": [
+            {"level": 1, "price": 100, "value": 1},
+            {"level": 2, "price": 500, "value": 2},
+            {"level": 3, "price": 2000, "value": 3},
+            # ... можно добавить больше уровней
+        ]
+    },
+    "passive_1": {
+        "id": "passive_1",
+        "name": "Catnip Farm",
+        "type": "passive",
+        "description": "Generates a steady stream of CatPoints over time.",
+         "levels": [
+            {"level": 1, "price": 250, "value": 20},
+            {"level": 2, "price": 1000, "value": 100},
+            {"level": 3, "price": 5000, "value": 600},
+            # ... можно добавить больше уровней
+        ]
+    },
+    "energy_1": {
+        "id": "energy_1",
+        "name": "Energy Drink Bowl",
+        "type": "energy",
+        "description": "Increases your maximum energy capacity.",
+         "levels": [
+            {"level": 1, "price": 1000, "value": 500},
+            {"level": 2, "price": 5000, "value": 1000},
+            # ... можно добавить больше уровней
+        ]
+    }
+    # Сюда можно будет добавлять новые апгрейды в будущем
+}
+
 users = sqlalchemy.Table(
     "users",
     metadata,
@@ -20,6 +63,17 @@ users = sqlalchemy.Table(
     sqlalchemy.Column("energy", sqlalchemy.Integer, default=100),
     sqlalchemy.Column("level", sqlalchemy.Integer, default=1),
     sqlalchemy.Column("last_seen", sqlalchemy.DateTime, default=datetime.datetime.utcnow)
+)
+
+user_upgrades = sqlalchemy.Table(
+    "user_upgrades",
+    metadata,
+    sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True),
+    sqlalchemy.Column("user_id", sqlalchemy.BigInteger, sqlalchemy.ForeignKey("users.user_id"), nullable=False),
+    sqlalchemy.Column("upgrade_id", sqlalchemy.String, nullable=False), # e.g., "tap_1", "passive_1"
+    sqlalchemy.Column("level", sqlalchemy.Integer, default=0, nullable=False),
+    # Ограничение, чтобы у одного пользователя не было двух одинаковых апгрейдов
+    sqlalchemy.UniqueConstraint('user_id', 'upgrade_id', name='uq_user_upgrade')
 )
 
 app = FastAPI()
@@ -150,4 +204,4 @@ app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 @app.get("/")
 async def read_root():
-    return FileResponse(os.path.join(static_dir, 'index.html'))
+    return FileResponse(os.path.join(static_dir, 'index.html')) 
