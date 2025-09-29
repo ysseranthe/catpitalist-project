@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         appContainer: document.getElementById('app-container'),
 
         // --- НОВЫЕ ЭЛЕМЕНТЫ ---
-        mainContent: document.querySelector('.main-content'), // Главный экран с котом
+        mainContent: document.getElementById('.main-content'), // Главный экран с котом
         upgradesScreen: document.getElementById('upgrades-screen'), // Экран улучшений
         upgradesListContainer: document.getElementById('upgrades-list-container'),
         upgradeCardTemplate: document.getElementById('upgrade-card-template'),
