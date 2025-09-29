@@ -91,16 +91,42 @@
 
         </main>
 
+        <section id="upgrades-screen" class="screen-content hidden">
+            <!-- Заголовок экрана -->
+            <h2 class="screen-title">Upgrades</h2>
+
+            <!-- Навигация по под-вкладкам (Tap, Passive, Energy) -->
+            <div class="sub-tab-nav">
+                <button class="sub-tab-button active" data-tab="tap">
+                    <img src="/static/images/tap-icon.png" alt="Tap">
+                    <span>Tap</span>
+                </button>
+                <button class="sub-tab-button" data-tab="passive">
+                    <img src="/static/images/passive-icon.png" alt="Passive">
+                    <span>Passive</span>
+                </button>
+                <button class="sub-tab-button" data-tab="energy">
+                    <img src="/static/images/energy-icon.png" alt="Energy">
+                    <span>Energy</span>
+                </button>
+            </div>
+
+            <!-- Контейнер, куда JS будет вставлять карточки улучшений -->
+            <div id="upgrades-list-container" class="upgrades-list-container">
+                <!-- Карточки будут генерироваться здесь -->
+            </div>
+        </section>
+
         <footer class="tab-bar">
-            <button class="tab-button">
+            <button class="tab-button" data-screen="upgrades-screen">
                 <img src="/static/images/productivity.png" alt="Upgrades">
                 <span>Upgrades</span>
             </button>
-            <button class="tab-button">
+            <button class="tab-button" data-screen="empire-screen">
                 <img src="/static/images/briefcase.png" alt="Empire">
                 <span>Empire</span>
             </button>
-            <button class="tab-button active">
+            <button class="tab-button active" data-screen="main-content">
                 <img src="/static/images/social.png" alt="Tap">
                 <span>Tap</span>
             </button>
@@ -139,6 +165,29 @@
             </div>
         </div>
     </div>
+
+    <template id="upgrade-card-template">
+        <div class="upgrade-card">
+            <div class="upgrade-icon-container">
+                <!-- Иконка будет установлена через JS -->
+                <img src="/static/images/question.png" alt="Upgrade Icon">
+            </div>
+            <div class="upgrade-info">
+                <h3 class="upgrade-name">Upgrade Name</h3>
+                <p class="upgrade-level">Level 0</p>
+                <div class="upgrade-bonus">
+                    <img src="/static/images/ctp.png" alt="Coin">
+                    <span>+100 per hour</span>
+                </div>
+            </div>
+            <div class="upgrade-action">
+                <button class="upgrade-buy-button">
+                    <span class="upgrade-price">1,000</span>
+                    <img src="/static/images/ctp.png" alt="Coin">
+                </button>
+            </div>
+        </div>
+    </template>
 
     <script src="/static/script.js?v=1.301" defer></script>
 </body>

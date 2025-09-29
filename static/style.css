@@ -451,3 +451,156 @@ body {
     color: var(--text-primary);
     margin-top: 2px;
 }
+
+/* ============================================= */
+/* ===== СТИЛИ ДЛЯ ЭКРАНА УЛУЧШЕНИЙ (UPGRADES) ===== */
+/* ============================================= */
+
+/* --- Общий контейнер для "экранов" --- */
+/* Этот класс будет у <section id="upgrades-screen"> и у будущих экранов */
+.screen-content {
+    display: flex; /* Используем flexbox для внутреннего расположения */
+    flex-direction: column; /* Элементы внутри будут идти сверху вниз */
+    width: 100%;
+    padding-top: 16px; /* Отступ сверху, чтобы не прилипать к топ-бару */
+    gap: 16px; /* Отступ между элементами (заголовком, табами, списком) */
+}
+
+/* --- Заголовок экрана (например, "Upgrades") --- */
+.screen-title {
+    font-size: 24px;
+    font-weight: 700;
+    text-align: center;
+}
+
+/* --- Навигация по под-вкладкам (Tap, Passive, Energy) --- */
+.sub-tab-nav {
+    display: flex;
+    background-color: var(--ui-bg);
+    border-radius: 12px;
+    padding: 4px;
+    gap: 4px; /* Небольшой отступ между кнопками */
+}
+
+.sub-tab-button {
+    flex: 1; /* Кнопки занимают равное пространство */
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-family: 'Lexend', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+.sub-tab-button img {
+    width: 20px;
+    height: 20px;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+/* Стиль для активной под-вкладки */
+.sub-tab-button.active {
+    background-color: #4a4a4e; /* Чуть светлее фона */
+    color: var(--text-primary);
+}
+.sub-tab-button.active img {
+    opacity: 1;
+}
+
+/* --- Контейнер для списка карточек --- */
+.upgrades-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* Отступ между карточками */
+    overflow-y: auto; /* Если карточек будет много, появится скролл */
+}
+
+/* --- Стили для одной карточки улучшения --- */
+.upgrade-card {
+    display: flex;
+    align-items: center;
+    background-color: var(--ui-bg);
+    padding: 12px;
+    border-radius: 12px;
+    gap: 12px;
+}
+
+.upgrade-icon-container {
+    flex-shrink: 0; /* Иконка не будет сжиматься */
+    width: 64px;
+    height: 64px;
+    background-color: var(--app-bg);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.upgrade-icon-container img {
+    width: 48px;
+    height: 48px;
+}
+
+.upgrade-info {
+    flex-grow: 1; /* Занимает все оставшееся место */
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.upgrade-name {
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.upgrade-level {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.upgrade-bonus {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+    font-weight: 500;
+}
+.upgrade-bonus img {
+    width: 16px;
+    height: 16px;
+}
+
+.upgrade-action {
+    flex-shrink: 0; /* Кнопка не будет сжиматься */
+}
+
+.upgrade-buy-button {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 12px;
+    font-family: 'Lexend', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    min-width: 80px;
+    transition: background-color 0.2s ease;
+}
+.upgrade-buy-button:active {
+    background-color: #0056b3; /* Более темный синий при нажатии */
+}
+.upgrade-buy-button img {
+    width: 20px;
+    height: 20px;
+}
