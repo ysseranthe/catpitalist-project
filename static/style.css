@@ -1,10 +1,9 @@
-/* --- Глобальные стили --- */
 :root {
     --app-bg: #1c1c1e;
     --ui-bg: #2c2c2e;
     --text-primary: #ffffff;
     --text-secondary: #8e8e93;
-    --accent-color: #007aff; /* Пример акцентного цвета */
+    --accent-color: #007aff;
 }
 
 * {
@@ -18,18 +17,17 @@ body {
     font-family: 'Lexend', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     color: var(--text-primary);
     overflow: hidden;
-    user-select: none; /* Запрещаем выделение текста во всем приложении */
+    user-select: none;
 }
 
 .app-container {
     display: flex;
     flex-direction: column;
-    height: 100dvh; /* Используем dvh для более точного расчета высоты на мобильных */
+    height: 100dvh;
     padding: 16px;
-    padding-bottom: 90px; /* Оставляем место для tab bar, чуть больше для безопасности */
+    padding-bottom: 90px;
 }
 
-/* --- Верхний бар --- */
 .top-bar {
     display: flex;
     justify-content: space-between;
@@ -51,17 +49,15 @@ body {
 }
 .user-info img { width: 24px; height: 24px; }
 
-/* --- Основной контент --- */
 .main-content {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 16px;
     margin-top: 16px;
-    flex-grow: 1; /* Позволяет этому блоку занять все доступное пространство */
+    flex-grow: 1;
 }
 
-/* --- Панель статистики --- */
 .stats-panel {
     display: flex;
     justify-content: space-between;
@@ -89,7 +85,6 @@ body {
 }
 .stat-value img { width: 18px; height: 18px; }
 
-/* --- Основной счет --- */
 .score-container {
     display: flex;
     align-items: center;
@@ -104,7 +99,6 @@ body {
     font-weight: 800;
 }
 
-/* --- Прогресс-бар --- */
 .level-progress {
     width: 100%;
 }
@@ -120,18 +114,16 @@ body {
     height: 8px;
     background-color: var(--ui-bg);
     border-radius: 4px;
-    overflow: hidden; /* Скрываем все, что выходит за рамки */
+    overflow: hidden;
 }
 .progress-bar-foreground {
-    width: 10%; /* Пример заполнения */
+    width: 10%;
     height: 100%;
     background-color: var(--text-primary);
     border-radius: 4px;
-    transition: width 0.3s ease-in-out; /* Плавная анимация изменения прогресса */
+    transition: width 0.3s ease-in-out;
 }
 
-/* --- Кот --- */
-/* --- Кот (финальная версия с radial-gradient) --- */
 .cat-container {
     flex-grow: 1;
     display: flex;
@@ -141,11 +133,10 @@ body {
     position: relative;
     min-height: 150px;
 
-    /* --- ГЛАВНОЕ ИЗМЕНЕНИЕ: ФОН-СВЕЧЕНИЕ --- */
     background: radial-gradient(
         circle,
-        rgba(255, 255, 255, 0.25) 0%, /* Цвет в центре */
-        rgba(255, 255, 255, 0) 50%  /* Прозрачный цвет на 50% радиуса */
+        rgba(255, 255, 255, 0.25) 0%,
+        rgba(255, 255, 255, 0) 50%  
     );
 }
 
@@ -158,7 +149,6 @@ body {
     background-position: center;
     background-repeat: no-repeat;
     
-    /* Анимация по-прежнему применяется только к коту */
     transform: scale(1);
     transition: transform 0.1s ease-out;
 }
@@ -170,10 +160,9 @@ body {
     width: 100%;
     height: 100%;
     cursor: pointer;
-    -webkit-tap-highlight-color: transparent; /* Убираем подсветку при тапе */
+    -webkit-tap-highlight-color: transparent;
 }
 
-/* --- Полоса энергии --- */
 .energy-bar {
     display: flex;
     align-items: center;
@@ -183,7 +172,6 @@ body {
 }
 .energy-bar img { width: 24px; height: 24px; }
 
-/* --- Нижнее меню --- */
 .tab-bar {
     position: fixed;
     bottom: 0;
@@ -193,22 +181,21 @@ body {
     justify-content: space-around;
     background-color: var(--ui-bg);
     padding: 8px 16px;
-    padding-bottom: calc(8px + env(safe-area-inset-bottom)); /* Безопасная зона на iPhone */
+    padding-bottom: calc(8px + env(safe-area-inset-bottom));
     border-top: 1px solid #3a3a3c;
 }
 
 .tab-button {
     background: none;
     border: none;
-    padding: 4px 8px; /* Немного уменьшаем вертикальный паддинг */
+    padding: 4px 8px;
     border-radius: 12px;
     transition: background-color 0.2s ease;
 
-    /* --- ГЛАВНОЕ ИЗМЕНЕНИЕ: делаем кнопку flex-контейнером --- */
     display: flex;
-    flex-direction: column; /* Элементы внутри (иконка, текст) будут идти сверху вниз */
-    align-items: center;    /* Выравниваем их по центру */
-    gap: 4px;               /* Добавляем небольшой отступ между иконкой и текстом */
+    flex-direction: column; 
+    align-items: center;    
+    gap: 4px;               
     flex: 1;
 }
 
@@ -216,27 +203,26 @@ body {
     background-color: #444;
 }
 
-/* Стили для ВСЕХ иконок в меню */
 .tab-button img {
-    width: 28px; /* Немного уменьшаем иконки, чтобы освободить место */
+    width: 28px;
     height: 28px;
-    opacity: 0.6; /* Неактивные иконки делаем полупрозрачными */
+    opacity: 0.6;
     transition: opacity 0.2s ease;
 }
 
 .tab-button span {
-    font-family: 'Lexend', sans-serif; /* Убеждаемся, что используется наш шрифт */
+    font-family: 'Lexend', sans-serif;
     font-size: 10px;
     font-weight: 500;
-    color: var(--text-secondary); /* Неактивные названия делаем серыми */
+    color: var(--text-secondary);
     transition: color 0.2s ease;
 }
 
 .tab-button.active img {
-    opacity: 1; /* Активная иконка - полностью непрозрачная */
+    opacity: 1; 
 }
 .tab-button.active span {
-    color: var(--text-primary); /* Активное название - белое */
+    color: var(--text-primary);
 }
 
 .loader-screen {
@@ -249,9 +235,9 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: var(--app-bg); /* Тот же фон, что и у игры */
-    z-index: 100; /* Убеждаемся, что он поверх всего */
-    transition: opacity 0.5s ease; /* Плавное исчезновение */
+    background-color: var(--app-bg); 
+    z-index: 100; 
+    transition: opacity 0.5s ease; 
 }
 
 .spinner {
@@ -270,7 +256,7 @@ body {
 }
 
 .hidden {
-    display: none !important; /* !important, чтобы перебить другие display */
+    display: none !important; 
 }
 
 .app-container.fade-in {
@@ -350,16 +336,13 @@ body {
 }
 
 .hero-cat-avatar {
-    /* 1. Задаем размеры контейнера */
-    width: 100px;  /* Размеры здесь больше, как и в вашем макете */
+    width: 100px; 
     height: 100px;
     
-    /* 2. Настраиваем фон (нашего кота) - ТОЧНО ТАК ЖЕ, КАК И ДЛЯ МАЛЕНЬКИХ */
     background-size: 175%; 
     background-position: center 10%; 
     background-repeat: no-repeat;
     
-    /* 3. Маска-градиент - АБСОЛЮТНО ТА ЖЕ САМАЯ */
     -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
     mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
 }
@@ -417,17 +400,14 @@ body {
 }
 
 .level-cat-avatar {
-    /* 1. Задаем размеры контейнера */
     width: 40px;
     height: 40px;
     margin-right: 12px;
 
-    /* 2. Настраиваем фон (нашего кота) - НОВЫЙ СПОСОБ */
-    background-size: 175%; /* <-- КЛЮЧЕВОЕ ИЗМЕНЕНИЕ №1: Увеличиваем кота */
-    background-position: center 10%; /* <-- КЛЮЧЕВОЕ ИЗМЕНЕНИЕ №2: Сдвигаем вверх, чтобы видеть только голову */
+    background-size: 175%; 
+    background-position: center 10%; 
     background-repeat: no-repeat;
     
-    /* 3. Маска-градиент - остается без изменений */
     -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
     mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
 }
@@ -452,38 +432,30 @@ body {
     margin-top: 2px;
 }
 
-/* ============================================= */
-/* ===== СТИЛИ ДЛЯ ЭКРАНА УЛУЧШЕНИЙ (UPGRADES) ===== */
-/* ============================================= */
-
-/* --- Общий контейнер для "экранов" --- */
-/* Этот класс будет у <section id="upgrades-screen"> и у будущих экранов */
 .screen-content {
-    display: flex; /* Используем flexbox для внутреннего расположения */
-    flex-direction: column; /* Элементы внутри будут идти сверху вниз */
+    display: flex;
+    flex-direction: column;
     width: 100%;
-    padding-top: 16px; /* Отступ сверху, чтобы не прилипать к топ-бару */
-    gap: 16px; /* Отступ между элементами (заголовком, табами, списком) */
+    padding-top: 16px;
+    gap: 16px; 
 }
 
-/* --- Заголовок экрана (например, "Upgrades") --- */
 .screen-title {
     font-size: 24px;
     font-weight: 700;
     text-align: center;
 }
 
-/* --- Навигация по под-вкладкам (Tap, Passive, Energy) --- */
 .sub-tab-nav {
     display: flex;
     background-color: var(--ui-bg);
     border-radius: 12px;
     padding: 4px;
-    gap: 4px; /* Небольшой отступ между кнопками */
+    gap: 4px;
 }
 
 .sub-tab-button {
-    flex: 1; /* Кнопки занимают равное пространство */
+    flex: 1;
     background: none;
     border: none;
     color: var(--text-secondary);
@@ -505,24 +477,21 @@ body {
     transition: opacity 0.2s ease;
 }
 
-/* Стиль для активной под-вкладки */
 .sub-tab-button.active {
-    background-color: #4a4a4e; /* Чуть светлее фона */
+    background-color: #4a4a4e;
     color: var(--text-primary);
 }
 .sub-tab-button.active img {
     opacity: 1;
 }
 
-/* --- Контейнер для списка карточек --- */
 .upgrades-list-container {
     display: flex;
     flex-direction: column;
-    gap: 8px; /* Отступ между карточками */
-    overflow-y: auto; /* Если карточек будет много, появится скролл */
+    gap: 8px;
+    overflow-y: auto;
 }
 
-/* --- Стили для одной карточки улучшения --- */
 .upgrade-card {
     display: flex;
     align-items: center;
@@ -533,7 +502,7 @@ body {
 }
 
 .upgrade-icon-container {
-    flex-shrink: 0; /* Иконка не будет сжиматься */
+    flex-shrink: 0;
     width: 64px;
     height: 64px;
     background-color: var(--app-bg);
@@ -548,7 +517,7 @@ body {
 }
 
 .upgrade-info {
-    flex-grow: 1; /* Занимает все оставшееся место */
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -577,7 +546,7 @@ body {
 }
 
 .upgrade-action {
-    flex-shrink: 0; /* Кнопка не будет сжиматься */
+    flex-shrink: 0; 
 }
 
 .upgrade-buy-button {
@@ -598,7 +567,7 @@ body {
     transition: background-color 0.2s ease;
 }
 .upgrade-buy-button:active {
-    background-color: #0056b3; /* Более темный синий при нажатии */
+    background-color: #0056b3;
 }
 .upgrade-buy-button img {
     width: 20px;
