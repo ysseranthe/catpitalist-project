@@ -12,6 +12,13 @@
     box-sizing: border-box;
 }
 
+body, #click-area {
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
 body {
     background-color: var(--app-bg);
     font-family: 'Lexend', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;

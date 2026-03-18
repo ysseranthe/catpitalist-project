@@ -11,6 +11,20 @@
     
     <link rel="stylesheet" href="style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <script type="importmap">
+    {
+      "imports": {
+        "config": "/static/js/config.js?v=1.0.1",
+        "state":  "/static/js/state.js?v=1.0.1",
+        "api":    "/static/js/api.js?v=1.0.1",
+        "ui":     "/static/js/ui.js?v=1.0.1"
+      }
+    }
+    </script>
+
+    <script type="module" src="/static/js/app.js?v=1.0.1"></script>
+
 </head>
 <body>
 
@@ -176,6 +190,5 @@
         </div>
     </template>
 
-    <script src="/static/script.js?v=1.301" defer></script>
 </body>
 </html>
