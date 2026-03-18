@@ -1,8 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    // --- 1. ЕДИНЫЙ ОБЪЕКТ СОСТОЯНИЯ ИГРЫ ---
-    // Все изменяемые переменные хранятся здесь.
-    // Этот объект создается заново при каждой загрузке скрипта,
-    // что гарантирует сброс всех значений.
+
     const gameState = {
         score: 0,
         energy: 0,
@@ -14,15 +11,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         tapValue: 1
     };
 
-    // --- 2. ПОИСК ВСЕХ ЭЛЕМЕНТОВ ИНТЕРФЕЙСА ---
-    const elements = {
+        const elements = {
         score: document.getElementById('score'),
         cat: document.getElementById('cat'),
         clickArea: document.getElementById('click-area'),
         energyLevel: document.getElementById('energy-level'),
         progressBar: document.getElementById('progress-bar-foreground'),
         usernameDisplay: document.getElementById('username-display'),
-        tabButtons: document.querySelectorAll('.tab-button'),
         tapEarnValue: document.getElementById('tap-earn-value'),
         levelUpCost: document.getElementById('level-up-cost'),
         profitValue: document.getElementById('profit-value'),
@@ -31,8 +26,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         loaderScreen: document.getElementById('loader-screen'),
         appContainer: document.getElementById('app-container'),
 
-        levelInfoTrigger: document.querySelector('.level-info'),
+        mainContent: document.getElementById('.main-content'),
+        upgradesScreen: document.getElementById('upgrades-screen'),
+        upgradesListContainer: document.getElementById('upgrades-list-container'),
+        upgradeCardTemplate: document.getElementById('upgrade-card-template'),
         
+        tabButtons: document.querySelectorAll('.tab-bar .tab-button'),
+        subTabButtons: document.querySelectorAll('.sub-tab-button'),
+        
+        levelInfoTrigger: document.querySelector('.level-info'),
         levelModalOverlay: document.getElementById('level-modal-overlay'),
         levelModalCloseBtn: document.getElementById('level-modal-close-btn'),
         heroLevelNumber: document.getElementById('hero-level-number'),
@@ -41,25 +43,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         levelProgressionList: document.getElementById('level-progression-list')
     };
 
-    // --- 3. ИГРОВЫЕ КОНСТАНТЫ И СПРАВОЧНИКИ ---
-    // Эти данные не меняются в ходе игры.
     const config = {
         maxEnergy: 100,
         levelNames: ["", "Homeless", "Street Cat", "Hustler", "Mouser", "Junior Entrepreneur", "Businessman", "Manager", "Tycoon", "Magnate", "Chairman", "Catpitalist", "The Marquess", "King of the Pride", "The Legend", "The Cat-peror"],
         scoreToNextLevel: [0, 500, 1500, 4000, 12000, 40000, 150000, 500000, 2000000, 10000000, 50000000, 250000000, 1500000000, 10000000000, 100000000000, 1000000000000],
         tapValueLevels: [0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 30, 40, 50],
         profitPerHourLevels: [0, 10, 50, 200, 750, 2500, 10000, 40000, 150000, 600000, 2500000, 12000000, 60000000, 300000000, 2000000000, 15000000000],
-        catImageLevels: ["", "CAT1.png", "CAT2.png", "CAT3.png", "CAT4.png", "CAT5.png", "CAT6.png", "CAT7.png", "CAT8.png", "CAT9.png", "CAT10.png", "CAT11.png", "CAT12.png", "CAT13.png", "CAT14.png", "CAT15.png"] // Добавьте сюда все 15 имен файлов
+        catImageLevels: ["", "CAT1.png", "CAT2.png", "CAT3.png", "CAT4.png", "CAT5.png", "CAT6.png", "CAT7.png", "CAT8.png", "CAT9.png", "CAT10.png", "CAT11.png", "CAT12.png", "CAT13.png", "CAT14.png", "CAT15.png"]
     };
 
-    // --- 4. ОСНОВНЫЕ ИГРОВЫЕ ФУНКЦИИ ---
 
      const updateDisplay = () => {
         elements.score.innerText = Math.floor(gameState.score).toLocaleString('en-US');
         elements.energyLevel.innerText = `${Math.floor(gameState.energy)}/${config.maxEnergy}`;
 
         if (!gameState.isLoading) {
-            // Пересчитываем только tapValue
             gameState.tapValue = config.tapValueLevels[gameState.level] || config.tapValueLevels.at(-1);
             
             const requiredScore = config.scoreToNextLevel[gameState.level] || Infinity;
@@ -69,7 +67,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             elements.tapEarnValue.innerText = `+${gameState.tapValue}`;
             elements.levelUpCost.innerText = formatScore(requiredScore);
             
-            // Отображаем profitPerHour, НЕ пересчитывая его
             elements.profitValue.innerText = `+${formatScore(Math.floor(gameState.profitPerHour))}`;
             
             elements.levelName.innerText = `${config.levelNames[gameState.level]} >`;
@@ -99,7 +96,6 @@ const checkLevelUp = () => {
     const visualTick = () => {
         if (gameState.isLoading) return;
 
-        // Возвращаем начисление пассивного дохода
         const profitPerTick = gameState.profitPerHour / 3600;
         gameState.score += profitPerTick;
 
@@ -107,10 +103,8 @@ const checkLevelUp = () => {
             gameState.energy = Math.min(config.maxEnergy, gameState.energy + gameState.energyPerSecond);
         }
         
-        // Проверяем уровень после начисления
         checkLevelUp();
         
-        // Обновляем отображение
         updateDisplay();
     };
 
@@ -180,24 +174,70 @@ const checkLevelUp = () => {
         return (num / 1_000_000_000_000).toFixed(1).replace('.0', '') + 'T';
     };
 
-    // --- ФУНКЦИИ ДЛЯ УПРАВЛЕНИЯ МОДАЛЬНЫМ ОКНОМ УРОВНЕЙ ---
+    const renderUpgradesList = () => {
+        const mockUpgrades = {
+             "tap_1": { id: "tap_1", name: "Sharp Claws", type: "tap", description: "...", levels: [{level: 1, price: 100, value: 1}, {level: 2, price: 500, value: 2}], userLevel: 1 },
+             "passive_1": { id: "passive_1", name: "Catnip Farm", type: "passive", description: "...", levels: [{level: 1, price: 250, value: 20}, {level: 2, price: 1000, value: 100}], userLevel: 0 },
+             "energy_1": { id: "energy_1", name: "Energy Drink Bowl", type: "energy", description: "...", levels: [{level: 1, price: 1000, value: 500}], userLevel: 0 }
+        };
+
+        const activeTab = document.querySelector('.sub-tab-button.active').dataset.tab;
+
+        elements.upgradesListContainer.innerHTML = '';
+
+        Object.values(mockUpgrades)
+            .filter(upgrade => upgrade.type === activeTab)
+            .forEach(upgrade => {
+                const card = elements.upgradeCardTemplate.content.cloneNode(true);
+                
+                const currentLevel = upgrade.userLevel;
+                const nextLevelInfo = upgrade.levels[currentLevel];
+
+                card.querySelector('.upgrade-name').innerText = upgrade.name;
+                card.querySelector('.upgrade-level').innerText = `Level ${currentLevel}`;
+                
+                if (nextLevelInfo) {
+                    card.querySelector('.upgrade-bonus').innerText = `+${nextLevelInfo.value} per ${upgrade.type === 'passive' ? 'hour' : 'tap'}`;
+                    card.querySelector('.upgrade-price').innerText = formatScore(nextLevelInfo.price);
+                } else {
+                    card.querySelector('.upgrade-bonus').innerText = 'Max Level';
+                    card.querySelector('.upgrade-buy-button').disabled = true;
+                    card.querySelector('.upgrade-price').innerText = 'MAX';
+                }
+                
+                elements.upgradesListContainer.appendChild(card);
+            });
+    };
+
+    const switchSubTab = (event) => {
+        elements.subTabButtons.forEach(btn => btn.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        renderUpgradesList();
+    };
+
+    const switchScreen = (screenId) => {
+        elements.mainContent.classList.add('hidden');
+        elements.upgradesScreen.classList.add('hidden');
+
+        const screenToShow = document.getElementById(screenId);
+        if (screenToShow) {
+            screenToShow.classList.remove('hidden');
+        }
+    };
+
     const openLevelModal = () => {
-        // 1. Заполняем "шапку" окна текущими данными
         elements.heroLevelNumber.innerText = gameState.level;
         elements.heroLevelName.innerText = config.levelNames[gameState.level];
         elements.heroCatAvatar.style.backgroundImage = `url('/static/images/${config.catImageLevels[gameState.level]}')`;
 
-        // 2. Очищаем старый список
         elements.levelProgressionList.innerHTML = '';
 
-        // 3. Генерируем и выводим новый список всех уровней
         config.levelNames.forEach((name, index) => {
-            if (index === 0) return; // Пропускаем технический "нулевой" уровень
+            if (index === 0) return;
 
             const levelItem = document.createElement('div');
             levelItem.classList.add('level-item');
 
-            // Определяем состояние уровня (пройден, текущий, будущий) и добавляем классы
             if (index < gameState.level) levelItem.classList.add('is-past');
             if (index === gameState.level) levelItem.classList.add('is-current');
             if (index > gameState.level) levelItem.classList.add('is-future');
@@ -219,7 +259,6 @@ const checkLevelUp = () => {
             elements.levelProgressionList.appendChild(levelItem);
         });
 
-        // 4. Показываем модальное окно
         elements.levelModalOverlay.classList.remove('hidden');
     };
 
@@ -227,7 +266,6 @@ const checkLevelUp = () => {
         elements.levelModalOverlay.classList.add('hidden');
     };
 
-    // --- 5. ЗАПУСК ИГРЫ ---
     const tg = window.Telegram.WebApp;
     tg.ready();
     tg.expand();
@@ -250,7 +288,15 @@ const checkLevelUp = () => {
         button.addEventListener('click', () => {
             elements.tabButtons.forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
+            const screenId = button.dataset.screen;
+            if (screenId) {
+                switchScreen(screenId);
+            }
         });
+    });
+
+    elements.subTabButtons.forEach(button => {
+        button.addEventListener('click', switchSubTab);
     });
 
     await initUser(tg);
@@ -258,7 +304,6 @@ const checkLevelUp = () => {
     elements.levelInfoTrigger.addEventListener('click', openLevelModal);
     elements.levelModalCloseBtn.addEventListener('click', closeLevelModal);
     elements.levelModalOverlay.addEventListener('click', (event) => {
-        // Закрываем окно при клике на темный фон
         if (event.target === elements.levelModalOverlay) {
             closeLevelModal();
         }
