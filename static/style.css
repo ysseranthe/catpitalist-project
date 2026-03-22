@@ -496,19 +496,25 @@ body {
 .upgrades-list-container {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
     padding: 10px 0;
+    overflow-y: auto;
+    flex-grow: 1;
+    -webkit-overflow-scrolling: touch;
 }
 
 .upgrade-card {
     display: flex;
     background-color: #2c2c2e;
-    border-radius: 16px;
+    border-radius: 20px;
     height: 110px;
     border: 1px solid #3a3a3c;
     overflow: hidden;
     position: relative;
     flex-shrink: 0;
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
 }
 
 .upgrade-image-side {
@@ -516,7 +522,7 @@ body {
     height: 100%;
     position: relative;
     background-color: #000;
-    border-right: 1px solid #3a3a3c;
+    flex-shrink: 0;
 }
 
 .upgrade-main-img {
@@ -524,27 +530,29 @@ body {
     height: 100%;
     object-fit: cover;
     display: block;
+    image-rendering: -webkit-optimize-contrast;
 }
 
 .upgrade-details-side {
     flex: 1;
-    padding: 12px 16px;
+    padding: 0 16px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: center; 
+    gap: 10px;
 }
 
 .upgrade-name {
     font-size: 15px;
-    font-weight: 600;
+    font-weight: 700;
     color: #8e8e93;
-    margin-bottom: 14px;
-    line-height: 1.2;
+    line-height: 1;
+    margin: 0;
 }
 
 .upgrade-stats-row {
     display: flex;
-    align-items: center;
+    align-items: center; 
     justify-content: space-between;
     width: 100%;
 }
@@ -552,14 +560,16 @@ body {
 .stat-group {
     display: flex;
     flex-direction: column;
+    justify-content: center;
     gap: 4px;
 }
 
 .stat-group span {
-    font-size: 9px;
+    font-size: 8px;
     color: #636366;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    line-height: 1;
 }
 
 .stat-group strong {
@@ -570,29 +580,51 @@ body {
 
 .divider {
     width: 1px;
-    height: 24px;
+    height: 20px;
     background-color: #3a3a3c;
-    margin: 0 4px;
+    flex-shrink: 0;
 }
 
 .price-group {
-    text-align: right;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
 }
 
 .price-wrapper {
     display: flex;
     align-items: center;
     gap: 6px;
+    height: 100%;
 }
 
 .price-wrapper img {
     width: 18px;
     height: 18px;
     display: block;
+    object-fit: contain;
+}
+
+.upgrade-price {
+    font-size: 15px;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1;
+}
+
+.upgrades-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px 0;
+    overflow-y: auto;
+    flex-grow: 1;
+    -webkit-overflow-scrolling: touch;
 }
 
 .upgrade-card.is-locked {
-    filter: grayscale(1) brightness(0.7);
+    filter: grayscale(1) brightness(0.6);
+    pointer-events: none;
 }
 
 .lock-overlay {
@@ -601,11 +633,14 @@ body {
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .lock-overlay img {
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
 }
 
 .upgrade-card.is-locked .upgrade-stats-row {
@@ -615,6 +650,7 @@ body {
 .upgrade-requirement {
     display: flex;
     flex-direction: column;
+    justify-content: center;
     gap: 4px;
 }
 
