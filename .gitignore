@@ -1,2 +1,14 @@
-__pycache__/main.cpython-313.pyc
-test.db
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+*.db
+*.sqlite3
+.vscode/
+.idea/
+static/js/*.log
+.DS_Store

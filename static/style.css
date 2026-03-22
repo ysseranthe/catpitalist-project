@@ -475,6 +475,7 @@ body {
     align-items: center;
     justify-content: center;
     gap: 6px;
+    line-height: 1;
     transition: background-color 0.2s ease, color 0.2s ease;
 }
 .sub-tab-button img {
@@ -495,88 +496,134 @@ body {
 .upgrades-list-container {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    overflow-y: auto;
+    gap: 12px;
+    padding: 10px 0;
 }
 
 .upgrade-card {
     display: flex;
-    align-items: center;
-    background-color: var(--ui-bg);
-    padding: 12px;
-    border-radius: 12px;
-    gap: 12px;
-}
-
-.upgrade-icon-container {
+    background-color: #2c2c2e;
+    border-radius: 16px;
+    height: 110px;
+    border: 1px solid #3a3a3c;
+    overflow: hidden;
+    position: relative;
     flex-shrink: 0;
-    width: 64px;
-    height: 64px;
-    background-color: var(--app-bg);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.upgrade-icon-container img {
-    width: 48px;
-    height: 48px;
 }
 
-.upgrade-info {
-    flex-grow: 1;
+.upgrade-image-side {
+    width: 35%;
+    height: 100%;
+    position: relative;
+    background-color: #000;
+    border-right: 1px solid #3a3a3c;
+}
+
+.upgrade-main-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.upgrade-details-side {
+    flex: 1;
+    padding: 12px 16px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    justify-content: center;
 }
 
 .upgrade-name {
-    font-size: 16px;
-    font-weight: 500;
+    font-size: 15px;
+    font-weight: 600;
+    color: #8e8e93;
+    margin-bottom: 14px;
+    line-height: 1.2;
 }
 
-.upgrade-level {
-    font-size: 12px;
-    color: var(--text-secondary);
-}
-
-.upgrade-bonus {
+.upgrade-stats-row {
     display: flex;
     align-items: center;
-    gap: 4px;
-    font-size: 14px;
-    font-weight: 500;
-}
-.upgrade-bonus img {
-    width: 16px;
-    height: 16px;
+    justify-content: space-between;
+    width: 100%;
 }
 
-.upgrade-action {
-    flex-shrink: 0; 
-}
-
-.upgrade-buy-button {
-    background-color: var(--accent-color);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    padding: 12px;
-    font-family: 'Lexend', sans-serif;
-    font-weight: 700;
-    font-size: 16px;
+.stat-group {
     display: flex;
     flex-direction: column;
-    align-items: center;
     gap: 4px;
-    cursor: pointer;
-    min-width: 80px;
-    transition: background-color 0.2s ease;
 }
-.upgrade-buy-button:active {
-    background-color: #0056b3;
+
+.stat-group span {
+    font-size: 9px;
+    color: #636366;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
-.upgrade-buy-button img {
-    width: 20px;
-    height: 20px;
+
+.stat-group strong {
+    font-size: 14px;
+    color: #ffffff;
+    line-height: 1;
+}
+
+.divider {
+    width: 1px;
+    height: 24px;
+    background-color: #3a3a3c;
+    margin: 0 4px;
+}
+
+.price-group {
+    text-align: right;
+}
+
+.price-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.price-wrapper img {
+    width: 18px;
+    height: 18px;
+    display: block;
+}
+
+.upgrade-card.is-locked {
+    filter: grayscale(1) brightness(0.7);
+}
+
+.lock-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 5;
+}
+
+.lock-overlay img {
+    width: 32px;
+    height: 32px;
+}
+
+.upgrade-card.is-locked .upgrade-stats-row {
+    display: none;
+}
+
+.upgrade-requirement {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.upgrade-requirement span {
+    color: #636366;
+    font-size: 10px;
+}
+
+.upgrade-requirement strong {
+    font-size: 15px;
+    color: #ffffff;
 }

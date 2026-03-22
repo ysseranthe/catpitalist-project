@@ -15,15 +15,15 @@
     <script type="importmap">
     {
       "imports": {
-        "config": "/static/js/config.js?v=1.0.1",
-        "state":  "/static/js/state.js?v=1.0.1",
-        "api":    "/static/js/api.js?v=1.0.1",
-        "ui":     "/static/js/ui.js?v=1.0.1"
+        "config": "/static/js/config.js?v=1.0.11",
+        "state":  "/static/js/state.js?v=1.0.11",
+        "api":    "/static/js/api.js?v=1.0.11",
+        "ui":     "/static/js/ui.js?v=1.0.11"
       }
     }
     </script>
 
-    <script type="module" src="/static/js/app.js?v=1.0.1"></script>
+    <script type="module" src="/static/js/app.js?v=1.0.11"></script>
 
 </head>
 <body>
@@ -102,15 +102,15 @@
 
             <div class="sub-tab-nav">
                 <button class="sub-tab-button active" data-tab="tap">
-                    <img src="/static/images/tap-icon.png" alt="Tap">
+                    <img src="/static/images/social.png" alt="Tap">
                     <span>Tap</span>
                 </button>
                 <button class="sub-tab-button" data-tab="passive">
-                    <img src="/static/images/passive-icon.png" alt="Passive">
+                    <img src="/static/images/productivity.png" alt="Passive">
                     <span>Passive</span>
                 </button>
                 <button class="sub-tab-button" data-tab="energy">
-                    <img src="/static/images/energy-icon.png" alt="Energy">
+                    <img src="/static/images/power.png" alt="Energy">
                     <span>Energy</span>
                 </button>
             </div>
@@ -167,28 +167,50 @@
             </div>
         </div>
     </div>
-
+    
     <template id="upgrade-card-template">
         <div class="upgrade-card">
-            <div class="upgrade-icon-container">
-                <img src="/static/images/question.png" alt="Upgrade Icon">
-            </div>
-            <div class="upgrade-info">
-                <h3 class="upgrade-name">Upgrade Name</h3>
-                <p class="upgrade-level">Level 0</p>
-                <div class="upgrade-bonus">
-                    <img src="/static/images/ctp.png" alt="Coin">
-                    <span>+100 per hour</span>
+            <div class="upgrade-image-side">
+                <img src="" class="upgrade-main-img">
+                <div class="lock-overlay hidden">
+                    <img src="/static/images/lock.png">
                 </div>
             </div>
-            <div class="upgrade-action">
-                <button class="upgrade-buy-button">
-                    <span class="upgrade-price">1,000</span>
-                    <img src="/static/images/ctp.png" alt="Coin">
-                </button>
+
+            <div class="upgrade-details-side">
+                <div class="upgrade-header">
+                    <h3 class="upgrade-name"></h3>
+                </div>
+                
+                <div class="upgrade-stats-row">
+                    <div class="stat-group">
+                        <span>Current Level</span>
+                        <strong class="upgrade-level"></strong>
+                    </div>
+                    
+                    <div class="divider"></div>
+                    
+                    <div class="stat-group">
+                        <span class="bonus-title">Bonus</span>
+                        <strong class="upgrade-bonus"></strong>
+                    </div>
+                    
+                    <div class="divider"></div>
+                    
+                    <div class="stat-group price-group">
+                        <div class="price-wrapper">
+                            <img src="/static/images/ctp.png">
+                            <strong class="upgrade-price"></strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="upgrade-requirement hidden">
+                    <span>Level required</span>
+                    <strong class="req-level-val"></strong>
+                </div>
             </div>
         </div>
     </template>
-
 </body>
 </html>
