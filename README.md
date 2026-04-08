@@ -7,6 +7,7 @@
   [![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
   [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://render.com)
   [![Telegram](https://img.shields.io/badge/Telegram-@CatpitalistBot-2CA5E0?style=for-the-badge&logo=telegram)](https://t.me/CatpitalistBot)
+  [![Figma](https://img.shields.io/badge/Figma-F24E1E?style=for-the-badge&logo=figma&logoColor=white)](https://www.figma.com/design/ero3xEUQxlbVkmmpLGFt9Z/Catpitalist--Copy-?node-id=2008-195&t=u9a137nHVdhVogW6-1)
 </div>
 
 ---
@@ -14,6 +15,11 @@
 ## 🐱 О проекте
 **Catpitalist** — смесь механик **Hamster Kombat** и легендарных **«Рабов»** в социальной сети «ВКонтакте». 
 Игроки кликают, чтобы заработать капитал, покупают улучшения для пассивного дохода и — самое главное — **берут других игроков в рабство**, получая процент от их успеха.
+
+## 🎨 Дизайн и UI/UX
+Интерфейс игры был полностью спроектирован в Figma с учетом особенностей **Telegram Mini Apps** (мобильная эргономика, зоны досягаемости больших пальцев).
+
+[<img src="https://img.shields.io/badge/Посмотреть_макет_в_Figma-F24E1E?style=for-the-badge&logo=figma&logoColor=white">](https://www.figma.com/design/ero3xEUQxlbVkmmpLGFt9Z/Catpitalist--Copy-?node-id=0-1&t=u9a137nHVdhVogW6-1)
 
 ## ✨ Реализованный функционал
 - **Async First:** Полностью асинхронный бэкенд, способный выдерживать высокие нагрузки (тапы).
